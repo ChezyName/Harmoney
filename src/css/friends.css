@@ -1,0 +1,140 @@
+#html{
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
+#main{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+#topBar{
+    height: 24px;
+    width: 100%;
+    float: top center;
+    background-color: var(--backgroundPrimary);
+    text-align: center;
+    color: var(--text);
+    -webkit-app-region: drag;
+}
+#topBar #close{
+    float: right;
+    height:100%;
+    width: 32px;
+    text-align: center;
+    color: var(--text);
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 1.5em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+#acpt,#snd{
+    float: right;
+    height:100%;
+    width: calc(calc(100% - 32px)/2);
+    text-align: center;
+    color: var(--text);;
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 1.5em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+#topBar #close:hover{
+    background-color: var(--topbarCloseHover);
+}
+
+#acpt:hover,#snd:hover{
+    background-color: var(--topbarHover);
+}
+
+#request{
+    width: 100%;
+    height: calc(100% - 24px);
+    position:absolute;
+    background-color: var(--backgroundSecondary);
+    left: 0%;
+    top: calc(0% + 24px);
+    z-index: 1;
+    transition: left .65s ease-in;
+    -webkit-transition: left .65s ease-in-out;
+
+    border: 3px solid var(--backgroundPrimary);
+}
+
+#accept{
+    width: 100%;
+    height: calc(100% - 24px);
+    position:absolute;
+    background-color: var(--backgroundSecondary);
+    left: 100%;
+    top: calc(0% + 24px);
+    z-index: 1;
+    transition: left .65s ease-in;
+    -webkit-transition: left .65s ease-in-out;
+
+    border: 3px solid var(--backgroundPrimary);
+    z-index: 1;
+    transition: all 0.65s ease-in;
+}
+
+#request *:not(t){
+    width: 100%;
+    height: 42px;
+    float: top center;
+    background-color: var(--interactble);
+    color: var(--text);
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#t{
+    width: 100%;
+    height: 24px !important;
+    background-color: transparent !important;
+    color: var(--text);
+    font-size: 1.5em;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#request *:hover{
+    background-color: var(--interactbleHover);
+}
+
+#accept *{
+    width: 100%;
+    height: 32px !important;
+    background-color: var(--interactble) !important;
+    color: var(--text);
+    font-size: 1.5em;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#accept *:hover{
+    background-color: var(--interactbleHover);
+}

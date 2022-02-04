@@ -1,0 +1,19 @@
+:root{
+    --backgroundPrimary: rgb(255, 217, 0);
+    --backgroundSecondary: rgb(230, 139, 22);
+
+    --text: rgb(0, 0, 0);
+
+    --outlines: rgb(136, 82, 0);
+
+    --interactble: rgb(255, 224, 83);
+    --interactbleHover: rgb(238, 255, 0);
+
+    --topBarPrimary: rgb(255, 0, 0);
+    --topBarSecondary: rgb(95, 0, 0);
+
+    --topbarButtons: rgb(136, 255, 0);
+    --topbarButtonsHover: rgb(45, 199, 104);
+
+    --topbarCloseHover: rgb(229, 255, 0);
+}

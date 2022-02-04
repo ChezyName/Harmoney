@@ -1,0 +1,290 @@
+#container{
+    width:100%;
+    height:100%;
+    display:block;
+    position:absolute;
+    top:0;
+    left:0;
+}
+
+#container nav{
+    display:block;
+    width:100%;
+    height:32px;
+}
+
+#container nav #titleShown{
+    width:30%;
+    height:100%;
+    line-height: 32px;
+    color: var(--text);
+    font-size: 1.2em;
+    font-weight: bold;
+    float:left;
+    padding: 0 0 0 1em;
+}
+
+#container nav #buttons{
+    float:top;
+    width: 100%;
+    height: 100%;
+    line-height: 30px;
+    background-color: var(--backgroundPrimary);
+    -webkit-app-region: drag;
+}
+
+#buttons #minimize, #buttons #close{
+    float: right;
+    height:100%;
+    width: 62px;
+    text-align: center;
+    color: var(--text);
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 1.5em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in-out .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+#buttons #menu , #buttons #settings{
+    float: left;
+    height:100%;
+    width: 42px;
+    text-align: center;
+    color: var(--text);
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 1.5em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in-out .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+/* Normal Side Bar Of Friends */
+#sideBar{
+    float: bottom left;
+    width: 42px;
+    height: calc(100% - 32px);
+    overflow-y: none;
+    display:block;
+    position:absolute;
+    bottom: 1;
+    left:0;
+    padding: 0 0 0 0;
+    background-color: var(--backgroundPrimary);
+    z-index: 1;
+
+    transition: width 1s;
+    transition-delay: 15ms;
+}
+
+#FriendHolder{
+    float: top center;
+    width: 100%;
+    height: calc(100% - 38px);
+    overflow-y: none; /*scroll*/
+    display:block;
+    position:absolute;
+    bottom: 1;
+    left:0;
+    padding: 0 0 0 0;
+    background-color: var(--backgroundPrimary);
+    z-index: 1;
+
+    transition: width 1s;
+    transition-delay: 15ms;
+}
+
+#FriendHolder *{
+    float: center top;
+    width: 100%;
+    height: 50px;
+    display:block;
+    padding: 0 0 0 0;
+
+    font-size: 1.5em;
+    font-weight: bold;
+
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+
+    background-color: var(--interactble);
+    overflow: hidden;
+
+    text-align: center;
+}
+
+#sideBar::-webkit-scrollbar {
+    display: none; /* for Chrome, Safari, and Opera */
+}
+
+#MainContents{
+    position: relative;
+    float: bottom !important;
+    bottom: 0% !important;
+
+    width: 100%;
+    height: calc(100% - 32px);
+    display:block;
+    padding: 0 0 0 0;
+    background-color: var(--backgroundSecondary);
+}
+
+#msgbox{
+    width: calc(100% - 86px);
+    height: 40px;
+    display:block;
+    padding: 0 0 0 0;
+
+    margin: 0px;
+    position: absolute !important;
+    
+    background-color: var(--backgroundPrimary);
+    overflow-y: scroll;
+    overflow-x: none;
+
+    text-align: left;
+    
+    border: none !important;
+    outline: none !important;
+
+    float: center;
+
+    left: calc(0% + 42px) !important;
+    border: 2.5px solid var(--outlines) !important;
+
+    color: var(--text);
+
+    transition: all 1s;
+    transition-delay: 15ms;
+    z-index: 5;
+}
+
+#Main_BG{
+    position: absolute;
+    background-color: var(--outlines);
+    width: 100%;
+    height: 40px;
+    bottom: 0% !important;
+    z-index: 4;
+}
+
+#Top_BG{
+    position: absolute;
+    background-color: var(--outlines);
+    width: calc(100% - 40px);;
+    height: 38px;
+    top: 0% !important;
+    left: calc(0% + 40px) !important;
+}
+
+#TopName{
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: right;
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--text);
+    background-color: transparent !important;
+}
+
+#submitBtn{
+    width: calc(0% + 40px);
+    height: 40px;
+    display:block;
+    padding: 0 0 0 0;
+
+    margin: 0px;
+    position: relative !important;
+    
+    background-color: var(--interactble);
+    overflow: none;
+
+    font-size: 2em;
+
+    text-align: center;
+
+    float: center right;
+    
+    left: calc(100% - 40px);
+
+    transition: all ease-in-out .25s;
+
+    border: 2.5px solid var(--outlines);
+
+    user-select: none;
+
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+
+    z-index: 5;
+}
+
+#submitBtn:hover{
+    background-color: var(--interactbleHover);
+}
+
+#addFriend{
+    float: top center;
+    height: 38px !important;
+    width: 100% !important;
+    text-align: center;
+    color: var(--text) !important;
+    -webkit-app-region: no-drag !important;
+    font-size: 1.5em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in-out .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+    font-family: monospace;
+}
+
+
+/*  Adding Hover Functionality For All Buttons */
+#buttons #minimize:hover, #buttons #settings:hover, #buttons #menu:hover{
+    background-color: var(--topbarButtonsHover);
+}
+
+#addFriend:hover{
+    background-color: var(--topbarButtonsHover);
+}
+
+#buttons #close:hover{
+    background-color: var(--topbarCloseHover);
+}
+
+#messeges{
+    width: calc(100% - 42px);
+    height: 100%;
+    background-color: var(--backgroundPrimary);
+    z-index: 1;
+    float: center right;
+    position: absolute;
+    left: 42px;
+}
+
+#messeges *{
+    width: calc(60%);
+    height: 50px;
+    background-color: var(--backgroundSecondary);
+    z-index: 1;
+    float: top left;
+    margin: 5px;
+    color: var(--text);
+    font-weight: bold;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+#messeges .otherMessege{
+    float: right !important;
+}

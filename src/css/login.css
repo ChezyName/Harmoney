@@ -1,0 +1,213 @@
+#html{
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
+#main{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+#topBar{
+    height: 24px;
+    width: 100%;
+    float: top center;
+    background-color: var(--backgroundPrimary);
+    text-align: center;
+    color: var(--text);
+    -webkit-app-region: drag;
+}
+
+#topBar #Title{
+    width:30%;
+    height:100%;
+    line-height: 32px;
+    color: var(--text);
+    font-size: 1.2em;
+    font-weight: bold;
+    float:left;
+    padding: 0 0 0 1em;
+}
+
+#topBar #close{
+    float: right;
+    height:100%;
+    width: 32px;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 5px;
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 1.5em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+#topBar #close:hover{
+    background-color: var(--topbarCloseHover);
+}
+
+#contents{
+    width: 100%;
+    height: calc(100% - 24px);
+    position:absolute;
+    background-color: var(--backgroundSecondary);
+    left: 0%;
+    top: calc(0% + 24px);
+    z-index: 1;
+    transition: left .65s ease-in;
+    -webkit-transition: left .65s ease-in-out;
+
+    border: 3px solid var(--backgroundPrimary);
+}
+
+#themes{
+    width: 100%;
+    height: calc(100% - 24px);
+    position:absolute;
+    background-color: var(--backgroundSecondary);
+    border: 3px solid var(--backgroundPrimary);
+    left: 100%;
+    top: calc(0% + 24px);
+    z-index: 1;
+    transition: left .65s ease-in;
+    -webkit-transition: left .65s ease-in-out;
+}
+
+#EmailBox{
+    width: calc(100% - 10px);
+    height: 40px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    float: top center;
+
+    background-color: var(--interactble);;
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 4px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+#PassBox{
+    width: calc(100% - 40px);
+    height: 40px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    float: top left;
+
+    background-color: var(--interactble);;
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 4px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+#ShowPassword{
+    width: 25px;
+    height: 40px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    position: absolute;
+    float: top right;
+    left: 210px;
+
+    background-color: var(--interactble);;
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 4px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+#EmailBox:hover,#PassBox:hover,#ShowPassword:hover{
+    background-color: var(--interactbleHover);
+}
+
+#Sep{
+    width: 100%;
+    height: calc(100% - (180px));
+    background-color: transparent !important;
+}
+
+#login{
+    width: calc(100% - 10px);
+    height: 40px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    background-color: var(--interactble);
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 4px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+
+    float: top center;
+}
+
+#register{
+    width: calc(100% - 10px);
+    height: 40px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    background-color: var(--interactble);
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 4px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+
+    float: top center;
+}
+
+#login:hover , #register:hover{
+    background-color: var(--interactbleHover) !important;
+}

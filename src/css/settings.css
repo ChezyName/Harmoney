@@ -1,0 +1,233 @@
+#html{
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
+#main{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+#topBar{
+    height: 24px;
+    width: 100%;
+    float: top center;
+    background-color: var(--backgroundPrimary);
+    text-align: center;
+    color: var(--text);
+    -webkit-app-region: drag;
+}
+
+#topBar #Title{
+    width:30%;
+    height:100%;
+    line-height: 32px;
+    color: var(--text);
+    font-size: 1.2em;
+    font-weight: bold;
+    float:left;
+    padding: 0 0 0 1em;
+}
+
+#topBar #close{
+    float: right;
+    height:100%;
+    width: 32px;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 5px;
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 1.5em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+#topBar #close:hover{
+    background-color: var(--topbarCloseHover);
+}
+
+#contents{
+    width: 100%;
+    height: calc(100% - 24px);
+    position:absolute;
+    background-color: var(--backgroundSecondary);
+    left: 0%;
+    top: calc(0% + 24px);
+    z-index: 1;
+    transition: left .65s ease-in;
+    -webkit-transition: left .65s ease-in-out;
+
+    border: 3px solid var(--backgroundPrimary);
+}
+
+#themes{
+    width: 100%;
+    height: calc(100% - 24px);
+    position:absolute;
+    background-color: var(--backgroundSecondary);
+    border: 3px solid var(--backgroundPrimary);
+    left: 100%;
+    top: calc(0% + 24px);
+    z-index: 1;
+    transition: left .65s ease-in;
+    -webkit-transition: left .65s ease-in-out;
+}
+
+#contents *, #themes *{
+    width: calc(100% - 10px);
+    height: 25px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    float: top center;
+
+    background-color: var(--interactble);;
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 12px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+#contents *:hover , #themes *:hover {
+    background-color: var(--interactbleHover);
+}
+
+#themes.moveT{
+    left: 0%;
+}
+#themes.moveF{
+    left: 100%;
+}
+
+#contents.moveT{
+    left: -100%;
+}
+#contents.moveF{
+    left: 0%;
+}
+
+#theme #backMain{
+    width: calc(100% - 10px);
+    height: 25px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    float: bottom center;
+
+    background-color: var(--interactble);;
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 12px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+#CustomTheme , #CustomTheme:hover{
+    width: calc(100% - 10px);
+    height: calc(100% - 65px);
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    float: bottom center;
+
+    background-color: var(--interactble);;
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 3px !important;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+#CustomTheme *, #CustomTheme *:hover{
+    width: calc(100% - 10px);
+    height: 25px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    float: top center;
+
+    background-color: transparent;
+    border: transparent;
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 12px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+#tt , #tt:hover{
+    background-color: transparent !important;
+    color: var(--text) !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+}
+
+#tTitle , #tTitle:hover{
+    text-align: center;
+    width: calc(100% - 10px);
+    height: 25px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    background-color:rgba(255, 255, 255, 0) !important;
+
+    float: top center;
+
+    background-color: var(--backgroundSecondary);
+    border: none !important;
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: none;
+    border-radius: 12px !important;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+.Divider, .Divider:hover{
+    background-color: transparent !important;
+    border: 0px transparent !important;
+    outline-color: none !important;
+    border-radius: 0 !important;
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<head>
+  <title id="title">Harmoney</title>
+  <link rel="stylesheet" media="all" href="../css/Themes/Dark.css" id="Theme">
+  
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/topbar.css">
+  <script src = "../js/topbar.js"></script>
+  <meta charset="UTF-8">
+</head>
+
+<html>
+  <body>
+    <div id="container" class="backgroundPrimary">
+      <nav>
+        <div id="buttons" class="topBarPrimary">
+
+          <!--
+          <button id="menu">
+            <span>☰</span>
+          </button>
+          -->
+
+          <button id="settings" class="interactble">
+            <span>⚙</span>
+          </button>
+
+          <div id="titleShown" class="text">
+            Harmoney
+          </div>
+
+          <button id="close" class="interactble">
+            <span>&times;</span>
+          </button>
+
+          <button id="minimize" class="interactble">
+            <span>&minus;</span>
+          </button>
+
+        </div>
+
+      </nav>
+
+      <div id = "sideBar" class="backgroundSecondary">
+        <button id="addFriend" class="interactble">+</button>
+        <div id="FriendHolder"></div>
+      </div>
+
+      <div id = "MainContents" class="backgroundPrimary">
+        
+        <!--
+        <div id="Top_BG">
+          <span id="TopName"></span>
+        </div>
+        -->
+
+        <div id="messeges">
+          <!-- ALL MESSEGES GO HERE -->
+        </div>
+
+        <div id="Main_BG">
+          
+          <input type="text" id="msgbox" name="msgbox" required
+          minlength="0" maxlength="1000" size="10" placeholder="Type A Message To Send To A Friend.">
+
+          <button id="submitBtn"><span>➤</span></button>
+        </div>
+
+      </div>
+    </div>
+  </body>
+</html>

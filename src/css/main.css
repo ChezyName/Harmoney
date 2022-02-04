@@ -1,0 +1,15 @@
+/* # is used for ID's | . are used for class names, IE: #name or .name */
+
+body,html{
+    width: 100%;
+    height: 100%;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: monospace;
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+}

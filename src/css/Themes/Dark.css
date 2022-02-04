@@ -1,0 +1,19 @@
+:root{
+    --backgroundPrimary: #222;
+    --backgroundSecondary: #333;
+
+    --text: #fff;
+
+    --outlines: #111;
+
+    --interactble: #444;
+    --interactbleHover: #556;
+
+    --topBarPrimary: #222;
+    --topBarSecondary: #333;
+
+    --topbarButtons: #111;
+    --topbarButtonsHover: #333;
+
+    --topbarCloseHover: #912;
+}
