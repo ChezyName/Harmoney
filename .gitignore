@@ -339,6 +339,7 @@ ASALocalRun/
 /node_modules
 /pages
 /scripts
+/dist
 
 #Remove Firebase Things
 /.firebaserc
@@ -346,3 +347,4 @@ ASALocalRun/
 /fireBaseData.js
 /harmoneyData.data
 /login.data
+
