@@ -332,3 +332,17 @@ ASALocalRun/
 
 # Local History for Visual Studio
 .localhistory/
+
+#Remove Large Folder
+/config
+/functions
+/node_modules
+/pages
+/scripts
+
+#Remove Firebase Things
+/.firebaserc
+/firebase.json
+/fireBaseData.js
+/harmoneyData.data
+/login.data
