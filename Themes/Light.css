@@ -16,4 +16,7 @@
     --topbarButtonsHover: #777;
 
     --topbarCloseHover: #911;
+
+    --scrollMain: rgb(143, 143, 143);
+    --scrollScnd: rgb(255, 255, 255);
 }

@@ -9,13 +9,13 @@ const uuidv1 = require("uuidv1");
 
 const firebaseConfig = {
     // CANT SHOW THESE LMAO
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: "",
-    measurementId: ""
+    apiKey: "AIzaSyBwkOA4AggcZC6TcqPIaSsjwzQmrccIIkQ",
+    authDomain: "project-harmoney.firebaseapp.com",
+    projectId: "project-harmoney",
+    storageBucket: "project-harmoney.appspot.com",
+    messagingSenderId: "1023335689095",
+    appId: "1:1023335689095:web:1baaace1e9372b89ecc122",
+    measurementId: "G-TWF7BHJXXY"
 };
 
 var currentUser;
@@ -50,12 +50,13 @@ const {app, BrowserWindow, dialog} = require('electron');
 const {ipcMain} = require('electron');
 const {join} = require('path/posix');
 let fs = require('fs');
+const { Z_ASCII } = require('zlib');
 
 var Settings = new HarmoneySettings();
 
 var Appdata = path.join(app.getPath('userData'), "Themes/");
-var filename = path.join(__dirname, "harmoneyData.data");
-var userpass = path.join(__dirname, "login.data");
+var filename = path.join(Appdata, "harmoneyData.data");
+var userpass = path.join(Appdata, "login.data");
 
 // all variables for the browser window instances
 var Set = null;
@@ -70,7 +71,7 @@ async function createMain() {
     }
     let oldWin = win;
     //gets all data before loading new window
-    win = new BrowserWindow({
+    var newWin = new BrowserWindow({
         width: Settings.Width, // 740
         height: Settings.Height, // 360
         resizable: true,
@@ -92,12 +93,14 @@ async function createMain() {
         }
     })
 
-    win.loadFile('src/html/main.html')
+    newWin.loadFile('src/html/main.html')
 
-    win.webContents.once('did-finish-load', function() {
+    newWin.webContents.once('did-finish-load', function() {
         //win.show();
+        //if(win != null) win.close();
+        win = newWin;
         getAllFriends();
-        win.openDevTools();
+        //win.openDevTools();
         let getT = async function() {
             if (fs.existsSync(filename)) {
                 //File Exits
@@ -127,6 +130,7 @@ async function createMain() {
             setTheme();
             if (loginWin != null) loginWin.close();
         })
+
         win.on('closed', _ => {
             app.exit();
         });
@@ -137,20 +141,18 @@ async function createMain() {
             Settings.Height = size[1];
             saveTheme();
         });
-        if (oldWin != null) {
-            oldWin.close();
-        }
+        win.on("closed", () => {
+            // Dereference the window object, usually you would store windows
+            // in an array if your app supports multi windows, this is the time
+            // when you should delete the corresponding element.
+            win = null;
+        });
     });
     app.on("window-all-closed", () => {
+        if(win != null || fwin != null || loginWin != null) return;
         if (process.platform !== 'darwin') {
             app.quit();
         }
-    });
-    win.on("closed", () => {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
-        win = null;
     });
 }
 //IPC Events
@@ -332,7 +334,6 @@ function createLogin() {
         //loginWin.openDevTools();
         loginWin.show();
         if (win != null) win.hide();
-        if (fwin != null) fwin.hide();
         if (Set != null) {
             Set.close();
         }
@@ -777,12 +778,7 @@ function onFinishLogin(user, email, pass) {
         }
         //console.log(UserData);
         writeUserData(user.uid, UserData).then();
-        if (win == null) {
-            createMain();
-        } else {
-            win.close();
-            createMain();
-        }
+        createMain();
         fs.writeFile(userpass, toJ, (err) => {});
     })
 }

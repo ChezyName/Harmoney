@@ -264,18 +264,37 @@
 
 #messeges{
     width: calc(100% - 42px);
-    height: 100%;
-    background-color: var(--backgroundPrimary);
+    height: calc(100% - 40px);
+    background-color: var(--backgroundSecondary);
     z-index: 1;
     float: center right;
     position: absolute;
     left: 42px;
+    overflow: auto;
+    overflow-y: auto;
+    z-index: 15;
+}
+
+/* Scroll bar functionality */
+*::-webkit-scrollbar {
+    width: 15px;
+    background-color: transparent !important;
+}
+*::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px var(--scrollMain); 
+    border-radius: 10px;
+}
+
+/* Handle */
+*::-webkit-scrollbar-thumb {
+    background: var(--scrollScnd); 
+    border-radius: 10px;
 }
 
 #messeges *{
     width: calc(60%);
     height: 50px;
-    background-color: var(--backgroundSecondary);
+    background-color: var(--backgroundPrimary);
     z-index: 1;
     float: top left;
     margin: 5px;
@@ -283,6 +302,7 @@
     font-weight: bold;
     font-size: 1.5em;
     text-align: center;
+    overflow-y: auto;
 }
 
 #messeges .otherMessege{
