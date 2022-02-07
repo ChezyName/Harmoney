@@ -291,7 +291,7 @@
     border-radius: 10px;
 }
 
-#messeges *{
+#messeges *:not(.Image){
     width: calc(60%);
     height: 50px;
     background-color: var(--backgroundPrimary);
@@ -303,8 +303,37 @@
     font-size: 1.5em;
     text-align: center;
     overflow-y: auto;
+    -webkit-user-drag: none; 
+    -khtml-user-drag: none; 
+    -moz-user-drag: none; 
+    -o-user-drag: none; 
+    user-drag: none; 
+    transition: all ease-in-out .2s;
 }
 
 #messeges .otherMessege{
     float: right !important;
+}
+
+#messeges .Image{
+    width: calc(60%);
+    background-color: var(--backgroundPrimary);
+    z-index: 1;
+    float: top left;
+    margin: 5px;
+    color: var(--text);
+    font-weight: bold;
+    font-size: 1.5em;
+    text-align: center;
+    overflow-y: auto;
+    -webkit-user-drag: none; 
+    -khtml-user-drag: none; 
+    -moz-user-drag: none; 
+    -o-user-drag: none; 
+    user-drag: none; 
+    transition: all ease-in-out .2s;
+}
+
+#messeges .Button:hover{
+    background-color: var(--interactbleHover);
 }

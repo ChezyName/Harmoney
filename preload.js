@@ -3,7 +3,7 @@ const {
     ipcRenderer
 } = require("electron");
 
-let validChannels = ["close","min","settings","closesettings","ThemeChanged","ChangeTheme","MainChanged","msg","register","onIcon","addUser","SentUsername","changeIcon","signOut","closeFriends","ReturningPP","login","openFriends","FriendRequests","sendFR","getAllFriendsReq","getFR","AcceptReq","getF","messageFriend","sendMsg","getM"];
+let validChannels = ["close","min","settings","closesettings","ThemeChanged","ChangeTheme","MainChanged","msg","register","onIcon","addUser","SentUsername","changeIcon","signOut","closeFriends","ReturningPP","login","openFriends","FriendRequests","sendFR","getAllFriendsReq","getFR","AcceptReq","getF","messageFriend","sendMsg","getM","openLink"];
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
