@@ -272,6 +272,7 @@
     left: 42px;
     overflow: auto;
     overflow-y: auto;
+    overflow-x: hidden;
     z-index: 15;
 }
 
@@ -293,26 +294,38 @@
 
 #messeges *:not(.Image){
     width: calc(60%);
-    height: 50px;
+    height:auto;
+    min-height: 10px;
+    max-height: none;
+    flex-direction: column;
     background-color: var(--backgroundPrimary);
     z-index: 1;
     float: top left;
+    overflow: hidden;
+    display:table;
     margin: 5px;
+    padding: 1.5px;
     color: var(--text);
     font-weight: bold;
     font-size: 1.5em;
-    text-align: center;
-    overflow-y: auto;
+    text-align: left;
+    overflow-y: none;
     -webkit-user-drag: none; 
     -khtml-user-drag: none; 
     -moz-user-drag: none; 
     -o-user-drag: none; 
     user-drag: none; 
     transition: all ease-in-out .2s;
+    display:inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
 }
 
 #messeges .otherMessege{
     float: right !important;
+    text-align: right !important;
 }
 
 #messeges .Image{
@@ -332,6 +345,7 @@
     -o-user-drag: none; 
     user-drag: none; 
     transition: all ease-in-out .2s;
+    display:inline-block;
 }
 
 #messeges .Button:hover{

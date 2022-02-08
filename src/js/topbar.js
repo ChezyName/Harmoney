@@ -76,6 +76,9 @@ window.onload = function() {
     window.api.receive("getM",(d) => {
         var data = d[0];
         if(data == undefined || data == null || data == [] || data == "") return;
+
+        if(arrayEquals(lastMsgs,data)) return;
+
         console.log("NEW:" + data);
         console.log("OLD: " + lastMsgs);
         var uid = d[1];
