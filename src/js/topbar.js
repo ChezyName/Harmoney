@@ -46,12 +46,18 @@ window.onload = function() {
     var sendBtn = document.getElementById('submitBtn')
 
     var mParent = document.getElementById('messeges');
+    var search = document.getElementById('search');
 
+    var frbds = [];
+    var fButtons = [];
     window.api.receive("getF",(data) => {
         console.log(data);
+        // if friends list did not change return
+        if(arrayEquals(frbds,data)) return;
 
         //remove all children from fParent
         removeAllChildNodes(fParent);
+        fButtons = [];
 
         for(var i = 0; i < data.length; i++) {
             //get the data and add the button to the array and continue
@@ -68,8 +74,41 @@ window.onload = function() {
                 });
                 //add button as the child of accept / acc
                 fParent.appendChild(b);
+                fButtons.push(b);
             }
         }
+
+        for(var i = 0; i < 250; i++){
+            var b = document.createElement("button");
+            b.innerHTML = "USER-" + i;
+            //add button as the child of accept / acc
+            fParent.appendChild(b);
+            fButtons.push(b);
+        }
+
+        frbds = data;
+
+        // add search Functionality
+        if(fButtons == null || fButtons == undefined) return;
+        var value = search.value;
+        value = value.toLowerCase();
+        
+        if(value == undefined || value == ""){
+            fButtons.forEach(user => {
+                if(user != undefined && user != null){
+                    user.classList.toggle("hide",false);
+                }
+            });
+            return;
+        }
+
+        fButtons.forEach(user => {
+            if(user != undefined && user != null){
+                console.log("THIS: " + user.innerHTML + " HAS " + value + ":" + user.innerHTML.includes(value));
+                const isVisible = user.innerHTML.toLowerCase().includes(value);
+                user.classList.toggle("hide",!isVisible);
+            }
+        });
     });
 
     var lastMsgs;
@@ -174,6 +213,74 @@ window.onload = function() {
         lastMsgs = data;
     });
 
+    search.addEventListener('keypress' ,(key) => {
+        if(fButtons == null || fButtons == undefined) return;
+        var value = search.value + key.key;
+        value = value.toLowerCase();
+
+        if(value == undefined || value == ""){
+            fButtons.forEach(user => {
+                if(user != undefined && user != null){
+                    user.classList.toggle("hide",false);
+                }
+            });
+            return;
+        }
+
+        fButtons.forEach(user => {
+            if(user != undefined && user != null){
+                console.log("THIS: " + user.innerHTML + " HAS " + value + ":" + user.innerHTML.includes(value));
+                const isVisible = user.innerHTML.toLowerCase().includes(value);
+                user.classList.toggle("hide",!isVisible);
+            }
+        });
+    });
+
+    search.onkeydown = function(){
+        var key = event.keyCode || event.charCode;
+
+        if( key == 8 || key == 46 ){
+            
+        if(fButtons == null || fButtons == undefined) return;
+        var value = search.value;
+        value = value.toLowerCase();
+        value = value.slice(0, -1);
+
+        console.log("BACKSPACED: " + value);
+
+        if(value == undefined || value == ""){
+            fButtons.forEach(user => {
+                if(user != undefined && user != null){
+                    user.classList.toggle("hide",false);
+                }
+            });
+            return;
+        }
+
+        fButtons.forEach(user => {
+            if(user != undefined && user != null){
+                console.log("THIS: " + user.innerHTML + " HAS " + value + ":" + user.innerHTML.includes(value));
+                const isVisible = user.innerHTML.toLowerCase().includes(value);
+                user.classList.toggle("hide",!isVisible);
+            }
+        });
+        }
+    }
+
+    search.onkeyup = function(event) {
+        if (this.value.length === 0) {
+            //reset everything
+            value = "";
+            fButtons.forEach(user => {
+                if(user != undefined && user != null){
+                    console.log("THIS: " + user.innerHTML + " HAS " + value + ":" + user.innerHTML.includes(value));
+                    const isVisible = user.innerHTML.toLowerCase().includes(value);
+                    user.classList.toggle("hide",!isVisible);
+                }
+            });
+        }
+      }
+    
     if(closeBtn){
         closeBtn.addEventListener('click',() =>{
             window.api.send("close");

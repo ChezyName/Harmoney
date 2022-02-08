@@ -70,29 +70,45 @@
 /* Normal Side Bar Of Friends */
 #sideBar{
     float: bottom left;
-    width: 42px;
+    width: 128px;
     height: calc(100% - 32px);
     overflow-y: none;
     display:block;
     position:absolute;
     bottom: 1;
-    left:0;
+    left: 0px;
     padding: 0 0 0 0;
     background-color: var(--backgroundPrimary);
-    z-index: 1;
+    z-index: 256;
 
     transition: width 1s;
     transition-delay: 15ms;
+}
+
+/* Scroll bar functionality for SIDEBAR */
+#sideBar::-webkit-scrollbar {
+    width: 2.5px !important;
+    background-color: transparent !important;
+}
+#sideBar::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px var(--scrollMain) !important; 
+    border-radius: 5px !important;
+}
+
+/* Handle */
+#sideBar::-webkit-scrollbar-thumb {
+    background: var(--scrollScnd) !important;
+    border-radius: 5px !important;
 }
 
 #FriendHolder{
-    float: top center;
     width: 100%;
     height: calc(100% - 38px);
-    overflow-y: none; /*scroll*/
+    overflow-y: auto; /*scroll*/
+    overflow-x: hidden;
     display:block;
     position:absolute;
-    bottom: 1;
+    top: 38px !important;
     left:0;
     padding: 0 0 0 0;
     background-color: var(--backgroundPrimary);
@@ -100,16 +116,23 @@
 
     transition: width 1s;
     transition-delay: 15ms;
+
+    display:inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    text-overflow: ellipsis;
 }
 
-#FriendHolder *{
+#FriendHolder *:not(.hide){
     float: center top;
     width: 100%;
     height: 50px;
     display:block;
     padding: 0 0 0 0;
 
-    font-size: 1.5em;
+    text-align: center;
+    font-size: 80%;
     font-weight: bold;
 
     margin-top: 2.5px;
@@ -119,6 +142,10 @@
     overflow: hidden;
 
     text-align: center;
+}
+
+#FriendHolder .hide{
+    display:none;
 }
 
 #sideBar::-webkit-scrollbar {
@@ -138,7 +165,7 @@
 }
 
 #msgbox{
-    width: calc(100% - 86px);
+    width: calc(100% - 178px);
     height: 40px;
     display:block;
     padding: 0 0 0 0;
@@ -155,16 +182,16 @@
     border: none !important;
     outline: none !important;
 
-    float: center;
+    float: center right;
 
-    left: calc(0% + 42px) !important;
+    right: 45px !important;
     border: 2.5px solid var(--outlines) !important;
 
     color: var(--text);
 
     transition: all 1s;
     transition-delay: 15ms;
-    z-index: 5;
+    z-index: 300 !important;
 }
 
 #Main_BG{
@@ -233,9 +260,29 @@
 }
 
 #addFriend{
-    float: top center;
+    position: absolute;
+    top: 0;
+    left: 0;
     height: 38px !important;
-    width: 100% !important;
+    width: 42px !important;
+    text-align: center;
+    color: var(--text) !important;
+    -webkit-app-region: no-drag !important;
+    font-size: 0.75em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in-out .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+    font-family: monospace;
+    z-index: 999;
+}
+#search{
+    position: absolute;
+    top: 0;
+    left: 42px;
+    height: 38px !important;
+    width: calc(100% - 42px) !important;
     text-align: center;
     color: var(--text) !important;
     -webkit-app-region: no-drag !important;
@@ -246,6 +293,7 @@
     box-shadow: none;
     border: none;
     font-family: monospace;
+    z-index: 999;
 }
 
 
@@ -254,7 +302,7 @@
     background-color: var(--topbarButtonsHover);
 }
 
-#addFriend:hover{
+#addFriend:hover,#search:hover{
     background-color: var(--topbarButtonsHover);
 }
 
@@ -263,31 +311,31 @@
 }
 
 #messeges{
-    width: calc(100% - 42px);
+    width: calc(100% - 130px);
     height: calc(100% - 40px);
     background-color: var(--backgroundSecondary);
     z-index: 1;
     float: center right;
     position: absolute;
-    left: 42px;
+    left: 130px;
     overflow: auto;
     overflow-y: auto;
     overflow-x: hidden;
-    z-index: 15;
+    z-index: 15; /* 15 */
 }
 
 /* Scroll bar functionality */
-*::-webkit-scrollbar {
+*:not(#sideBar)::-webkit-scrollbar {
     width: 15px;
     background-color: transparent !important;
 }
-*::-webkit-scrollbar-track {
+*:not(#sideBar)::-webkit-scrollbar-track {
     box-shadow: inset 0 0 5px var(--scrollMain); 
     border-radius: 10px;
 }
 
 /* Handle */
-*::-webkit-scrollbar-thumb {
+*:not(#sideBar)::-webkit-scrollbar-thumb {
     background: var(--scrollScnd); 
     border-radius: 10px;
 }
@@ -300,7 +348,6 @@
     flex-direction: column;
     background-color: var(--backgroundPrimary);
     z-index: 1;
-    float: top left;
     overflow: hidden;
     display:table;
     margin: 5px;
@@ -314,9 +361,9 @@
     -khtml-user-drag: none; 
     -moz-user-drag: none; 
     -o-user-drag: none; 
-    user-drag: none; 
     transition: all ease-in-out .2s;
     display:inline-block;
+
     word-break: break-all;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -332,7 +379,6 @@
     width: calc(60%);
     background-color: var(--backgroundPrimary);
     z-index: 1;
-    float: top left;
     margin: 5px;
     color: var(--text);
     font-weight: bold;
@@ -343,7 +389,6 @@
     -khtml-user-drag: none; 
     -moz-user-drag: none; 
     -o-user-drag: none; 
-    user-drag: none; 
     transition: all ease-in-out .2s;
     display:inline-block;
 }
