@@ -1,9 +1,7 @@
-/*
-    +Add Search Bar To Search For Friends
-*/
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const ProgressBar = require('electron-progressbar');
+
 const firebase = require('firebase')
 require("firebase/auth");
 require("firebase/storage");
@@ -12,13 +10,13 @@ const uuidv1 = require("uuidv1");
 
 const firebaseConfig = {
     // CANT SHOW THESE LMAO
-    apiKey: "AIzaSyBwkOA4AggcZC6TcqPIaSsjwzQmrccIIkQ",
-    authDomain: "project-harmoney.firebaseapp.com",
-    projectId: "project-harmoney",
-    storageBucket: "project-harmoney.appspot.com",
-    messagingSenderId: "1023335689095",
-    appId: "1:1023335689095:web:1baaace1e9372b89ecc122",
-    measurementId: "G-TWF7BHJXXY"
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    storageBucket: "",
+    messagingSenderId: "",
+    appId: "",
+    measurementId: ""
 };
 
 var currentUser;
@@ -48,7 +46,7 @@ class HarmoneySettings {
 }
 
 const path = require('path');
-const iconPath = "icon.ico";
+const iconPath = "icon/icon.ico";
 const {app, BrowserWindow, dialog} = require('electron');
 const {ipcMain} = require('electron');
 const {join} = require('path/posix');
@@ -62,6 +60,9 @@ console.log(Appdata);
 var filename = path.join(Appdata, "harmoneyData.data");
 var userpass = path.join(Appdata, "login.data");
 
+var ver = path.join(Appdata, "version.data");
+var tmp = path.join(Appdata, "/temp/");
+
 var epassD = {
     Email: "",
     Pass: "",
@@ -69,9 +70,11 @@ var epassD = {
 
 //make the files if they dont exist
 if(!fs.existsSync(Appdata)) fs.mkdir(Appdata, (err) => {});
+if(!fs.existsSync(tmp)) fs.mkdir(tmp, (err) => {});
+
 if(!fs.existsSync(filename)) fs.writeFile(filename, "", (err) => {});
 if(!fs.existsSync(userpass)) fs.writeFile(userpass, JSON.stringify(epassD), (err) => {});
-
+if(!fs.existsSync(ver)) fs.writeFile(userpass, JSON.stringify(""), (err) => {});
 
 // all variables for the browser window instances
 var Set = null;
@@ -818,9 +821,13 @@ function onFinishLogin(user, email, pass) {
 }
 // when the app is ready create the login prompt
 app.whenReady().then(() => {
+    getUpdatesAndStart();
+})
+
+async function getUpdatesAndStart(){
     // try auto login
     autoLogin();
-})
+}
 //Messaging Features
 var fwinwas = false; ipcMain.on("closeFriends", _ => {
     fwin.hide();

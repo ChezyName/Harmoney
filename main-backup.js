@@ -1,6 +1,7 @@
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const ProgressBar = require('electron-progressbar');
+
 const firebase = require('firebase')
 require("firebase/auth");
 require("firebase/storage");
@@ -45,17 +46,36 @@ class HarmoneySettings {
 }
 
 const path = require('path');
-const iconPath = "icon.ico";
+const iconPath = "icon/icon.ico";
 const {app, BrowserWindow, dialog} = require('electron');
 const {ipcMain} = require('electron');
 const {join} = require('path/posix');
 let fs = require('fs');
+const { Z_ASCII } = require('zlib');
 
 var Settings = new HarmoneySettings();
 
-var Appdata = path.join(app.getPath('userData'), "Themes/");
-var filename = path.join(__dirname, "harmoneyData.data");
 var userpass = path.join(__dirname, "login.data");
+var Appdata = path.join(app.getPath('appData'),"/HarmoneyData/");
+console.log(Appdata);
+var filename = path.join(Appdata, "harmoneyData.data");
+var userpass = path.join(Appdata, "login.data");
+
+var ver = path.join(Appdata, "version.data");
+var tmp = path.join(Appdata, "/temp/");
+
+var epassD = {
+    Email: "",
+    Pass: "",
+}
+
+//make the files if they dont exist
+if(!fs.existsSync(Appdata)) fs.mkdir(Appdata, (err) => {});
+if(!fs.existsSync(tmp)) fs.mkdir(tmp, (err) => {});
+
+if(!fs.existsSync(filename)) fs.writeFile(filename, "", (err) => {});
+if(!fs.existsSync(userpass)) fs.writeFile(userpass, JSON.stringify(epassD), (err) => {});
+if(!fs.existsSync(ver)) fs.writeFile(userpass, JSON.stringify(""), (err) => {});
 
 // all variables for the browser window instances
 var Set = null;
@@ -63,14 +83,17 @@ var loginWin = null;
 var win = null;
 var fwin = null;
 
+var creatingMain = false;
 async function createMain() {
     // closing if already opened
+    if(creatingMain == true) return;
     if (!app.requestSingleInstanceLock()) {
         app.exit();
     }
     let oldWin = win;
+    creatingMain = true;
     //gets all data before loading new window
-    win = new BrowserWindow({
+    var newWin = new BrowserWindow({
         width: Settings.Width, // 740
         height: Settings.Height, // 360
         resizable: true,
@@ -92,10 +115,13 @@ async function createMain() {
         }
     })
 
-    win.loadFile('src/html/main.html')
+    newWin.loadFile('src/html/main.html')
 
-    win.webContents.once('did-finish-load', function() {
+    newWin.webContents.once('did-finish-load', function() {
+        creatingMain = false;
         //win.show();
+        //if(win != null) win.close();
+        win = newWin;
         getAllFriends();
         win.openDevTools();
         let getT = async function() {
@@ -127,6 +153,7 @@ async function createMain() {
             setTheme();
             if (loginWin != null) loginWin.close();
         })
+
         win.on('closed', _ => {
             app.exit();
         });
@@ -137,20 +164,18 @@ async function createMain() {
             Settings.Height = size[1];
             saveTheme();
         });
-        if (oldWin != null) {
-            oldWin.close();
-        }
+        win.on("closed", () => {
+            // Dereference the window object, usually you would store windows
+            // in an array if your app supports multi windows, this is the time
+            // when you should delete the corresponding element.
+            win = null;
+        });
     });
     app.on("window-all-closed", () => {
+        if(win != null || fwin != null || loginWin != null) return;
         if (process.platform !== 'darwin') {
             app.quit();
         }
-    });
-    win.on("closed", () => {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
-        win = null;
     });
 }
 //IPC Events
@@ -332,20 +357,22 @@ function createLogin() {
         //loginWin.openDevTools();
         loginWin.show();
         if (win != null) win.hide();
-        if (fwin != null) fwin.hide();
         if (Set != null) {
             Set.close();
         }
     });
 }
+var trying = false;
 ipcMain.on("register", (event, args) => {
     ////console.log("R: " + args.Email + " : " + args.Pass);
+    if(trying == true) return;
     eml = args.Email;
     pss = args.Pass;
     tryRegister(args.Email, args.Pass);
 });
 ipcMain.on("login", (event, args) => {
     ////console.log("LO]IN: " + args.Email + " : " + args.Pass);
+    if(trying == true) return;
     eml = args.Email;
     pss = args.Pass;
     if (eml == null || pss == null) {
@@ -659,32 +686,39 @@ async function autoLogin() {
     };
     try {
         fs.readFile(userpass, (err, data) => {
-            if (err) {
+            if (err || data == null || data == undefined) {
                 createLogin();
                 return;
             }
+
             // automaticly login
-            var d = JSON.parse(data);
-            //console.log("E: " + d.Email, + "P: " + d.Pass);
-            if (d.Email == null || d.Pass == null) {
-                createLogin();
-                return;
-            }
-            Auth.signInWithEmailAndPassword(d.Email, d.Pass)
-            .then((u) => {
-                // Signed in
-                currentUser = u.user;
-                //console.log('U: ' + currentUser.uid);
-                if (currentUser == null) {
+            var d = { Email: "", Pass: "",}
+            try{
+                d = JSON.parse(data);
+                //console.log("E: " + d.Email, + "P: " + d.Pass);
+                if (d.Email == null || d.Pass == null) {
                     createLogin();
                     return;
                 }
-                onFinishLogin(currentUser, d.Email, d.Pass);
-            })
-            .catch((error) => {
-                //console.log(error + " Making Login");
+                Auth.signInWithEmailAndPassword(d.Email, d.Pass)
+                .then((u) => {
+                    // Signed in
+                    currentUser = u.user;
+                    //console.log('U: ' + currentUser.uid);
+                    if (currentUser == null) {
+                        createLogin();
+                        return;
+                    }
+                    onFinishLogin(currentUser, d.Email, d.Pass);
+                })
+                .catch((error) => {
+                    //console.log(error + " Making Login");
+                    createLogin();
+                });
+            }
+            catch{
                 createLogin();
-            });
+            }
         });
     } catch {
         // file does not exist
@@ -696,6 +730,7 @@ async function autoLogin() {
 function tryLogin(d) {
     //console.log("Trying To [X] Using " + d.Email + " With " + d.Pass);
     // return true or false based on if login was successful
+    trying = true;
     Auth.signInWithEmailAndPassword(d.Email, d.Pass)
     .then((u) => {
         // Signed in
@@ -711,12 +746,14 @@ function tryLogin(d) {
     })
     .catch((error) => {
         showMessage("ERROR", error.message);
+        trying = false;
     });
 }
 // FIRE BASE REGISTER
 function tryRegister(email, pass) {
     //console.log("AUTH STATUS: " + Auth);
     //console.log("Trying To Register Using " + email + " With " + pass);
+    trying = true;
     Auth.createUserWithEmailAndPassword(email, pass)
     .then((u) => {
         //register success
@@ -737,6 +774,7 @@ function tryRegister(email, pass) {
             const errorMessage = error.message;
             showMessage(errorCode, errorMessage);
         }
+        trying = false;
     })
 }
 //class to save and load user information
@@ -759,6 +797,7 @@ ipcMain.on("GetPP", _ => {
 //function to fully login user and alow them to
 // use the full app and save email+password
 function onFinishLogin(user, email, pass) {
+    trying = false;
     var d = new userData();
     d.Email = email;;
     d.Pass = pass;
@@ -777,20 +816,19 @@ function onFinishLogin(user, email, pass) {
         }
         //console.log(UserData);
         writeUserData(user.uid, UserData).then();
-        if (win == null) {
-            createMain();
-        } else {
-            win.close();
-            createMain();
-        }
+        createMain();
         fs.writeFile(userpass, toJ, (err) => {});
     })
 }
 // when the app is ready create the login prompt
 app.whenReady().then(() => {
+    getUpdatesAndStart();
+})
+
+async function getUpdatesAndStart(){
     // try auto login
     autoLogin();
-})
+}
 //Messaging Features
 var fwinwas = false; ipcMain.on("closeFriends", _ => {
     fwin.hide();
@@ -979,6 +1017,10 @@ async function getAllFriends() {
         }
     });
 }
+
+ipcMain.on("openLink",(event, args) => {
+    require("electron").shell.openExternal(args);
+});
 
 //gets all the friends associated with the current user
 async function getAllFR() {
@@ -1180,14 +1222,14 @@ function getMessages(from, to) {
                     .then(_ => {
                         //console.log('Saved Data Good :D');
                         if (win != null) {
-                            win.webContents.send("getM", d);
+                            win.webContents.send("getM", [d,currentUser.uid]);
                         }
                         resolve(d);
                     })
                     .catch(err => {
                         //console.log("error wriritng to doc: " + err);
                         if (win != null) {
-                            win.webContents.send("getM", d);
+                            win.webContents.send("getM", [d,currentUser.uid]);
                         }
                         resolve(d);
                     });
@@ -1195,7 +1237,7 @@ function getMessages(from, to) {
                 console.log("Found Doc:");
                 console.log(data.data().messages);
                 if (win != null) {
-                    win.webContents.send("getM", data.data().messages);
+                    win.webContents.send("getM", [data.data().messages,currentUser.uid]);
                 }
                 resolve(data.data().messages);
             }

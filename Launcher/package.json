@@ -1,0 +1,26 @@
+{
+  "name": "harmoney",
+  "version": "1.0.0",
+  "description": "launcher for harmoney app",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ./main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChezyName/Harmoney.git"
+  },
+  "author": "ChezyName",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ChezyName/Harmoney/issues"
+  },
+  "homepage": "https://github.com/ChezyName/Harmoney#readme",
+  "dependencies": {
+    "extract-zip": "^2.0.1",
+    "node-fetch": "^3.2.0",
+    "node-fetch-progress": "^1.0.2",
+    "uaup-js": "^0.0.22"
+  }
+}
