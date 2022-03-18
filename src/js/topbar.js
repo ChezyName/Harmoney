@@ -27,11 +27,15 @@ function isValidUrl(_string){
 }
 
 window.onload = function() {
+    //load the webRTC client JS Script
+    webRTC.onLoad();
+
     var closeBtn = document.getElementById('close');
     var minBtn = document.getElementById('minimize');
     var Menu = document.getElementById('menu');
     var Side = document.getElementById('sideBar');
     var Settings = document.getElementById('settings');
+    var friendName = document.getElementById('TopName');
 
     var fParent = document.getElementById('FriendHolder');
 
@@ -43,7 +47,7 @@ window.onload = function() {
     var Theme = document.getElementById('Theme');
 
     var msgBox = document.getElementById('msgbox');
-    var sendBtn = document.getElementById('submitBtn')
+    var sendBtn = document.getElementById('submitBtn');
 
     var mParent = document.getElementById('messeges');
     var search = document.getElementById('search');
@@ -69,8 +73,10 @@ window.onload = function() {
                 b.name = data[i].uid;
                 b.addEventListener("click", _ =>{
                     //call the api to accept the request
+
                     console.log("Clicked On Friend: " + b.innerHTML + " WITH UID: " + b.name);
-                    window.api.send("messageFriend",b.name);
+                    friendName.innerHTML = b.innerHTML;
+                    window.api.send("messageFriend",{uid: b.name, name: b.innerHTML});
                 });
                 //add button as the child of accept / acc
                 fParent.appendChild(b);
@@ -78,6 +84,7 @@ window.onload = function() {
             }
         }
 
+        /*
         for(var i = 0; i < 250; i++){
             var b = document.createElement("button");
             b.innerHTML = "USER-" + i;
@@ -85,6 +92,7 @@ window.onload = function() {
             fParent.appendChild(b);
             fButtons.push(b);
         }
+        */
 
         frbds = data;
 
@@ -113,13 +121,15 @@ window.onload = function() {
 
     var lastMsgs;
     window.api.receive("getM",(d) => {
+        console.log("Recived Messages! ");
+        //console.log(d);
         var data = d[0];
         if(data == undefined || data == null || data == [] || data == "") return;
 
         if(arrayEquals(lastMsgs,data)) return;
 
-        console.log("NEW:" + data);
-        console.log("OLD: " + lastMsgs);
+        //console.log("NEW:" + data);
+        //console.log("OLD: " + lastMsgs);
         var uid = d[1];
         //remove all children from mParent
         removeAllChildNodes(mParent);
@@ -143,7 +153,7 @@ window.onload = function() {
                     var img = new Image();
                     img.addEventListener("load", function() {
                         var HRatio = this.naturalHeight/this.naturalWidth;
-                        console.log("WD Ratio: " + HRatio);
+                        //console.log("WD Ratio: " + HRatio);
                         b.height = b.width * HRatio; // make the image scale properly using the width witch is
                         // constant and scaling the height of the image by the Ratio using the width
     
@@ -168,13 +178,13 @@ window.onload = function() {
                     //b.href = data[i].msg;
                     b.id = data[i].from;
 
-                    console.log("ISLINK:");
-                    console.log(data[i].msg);
+                    //console.log("ISLINK:");
+                    //console.log(data[i].msg);
 
                     b.classList.add("Button");
 
                     b.addEventListener("click", function(){
-                        window.api.send("openLink",b.innerHTML);
+                        window.api.send("openLink",this.innerHTML);
                     });
 
                     // move message to the right side if not sent from this user
@@ -204,7 +214,7 @@ window.onload = function() {
             }
         }
 
-        console.log("Arrays Are Same Bcs: " + arrayEquals(lastMsgs,data));
+        //console.log("Arrays Are Same Bcs: " + arrayEquals(lastMsgs,data));
 
         if(!arrayEquals(lastMsgs,data)){
             mParent.scrollTop = mParent.scrollHeight;
@@ -229,7 +239,7 @@ window.onload = function() {
 
         fButtons.forEach(user => {
             if(user != undefined && user != null){
-                console.log("THIS: " + user.innerHTML + " HAS " + value + ":" + user.innerHTML.includes(value));
+                //console.log("THIS: " + user.innerHTML + " HAS " + value + ":" + user.innerHTML.includes(value));
                 const isVisible = user.innerHTML.toLowerCase().includes(value);
                 user.classList.toggle("hide",!isVisible);
             }
@@ -320,7 +330,6 @@ window.onload = function() {
         console.log("ThemeChanged...");
         window.api.getTheme();
     });
-
 
     window.api.receive("MainChanged", (t) => {
         console.log("Changing Theme To New Theme : " + t);

@@ -6,12 +6,16 @@
   
   <link rel="stylesheet" href="../css/main.css">
   <link rel="stylesheet" href="../css/topbar.css">
+
+  <script src = "../js/webrtc.js"></script>
   <script src = "../js/topbar.js"></script>
   <meta charset="UTF-8">
 </head>
 
 <html>
   <body>
+    <audio id="speaker" volume="1.0"></audio>
+
     <div id="container" class="backgroundPrimary">
       <nav>
         <div id="buttons" class="topBarPrimary">
@@ -51,14 +55,14 @@
 
       <div id = "MainContents" class="backgroundPrimary">
         
-        <!--
         <div id="Top_BG">
-          <span id="TopName"></span>
+          <span id="TopName">USERNAME</span>
+          <button id="CallButton">☏</button>
         </div>
-        -->
 
         <div id="messeges">
           <!-- ALL MESSEGES GO HERE -->
+          <div id = "tutorial">Use The Left Side Bar To Send Messages To Others, Or Add Others To Your Friends List.</div>
         </div>
 
         <div id="Main_BG">

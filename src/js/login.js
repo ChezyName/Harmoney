@@ -41,6 +41,9 @@ window.onload = function() {
             Pass: pass.value,
         };
         window.api.send("register",data);
+
+        email.disabled = true;
+        pass.disabled = true;
     });
 
     login.addEventListener('click',() =>{
@@ -49,6 +52,16 @@ window.onload = function() {
             Pass: pass.value,
         };
         window.api.send("login",data);
+
+        //disable input onto the input boxes : email & pass
+        email.disabled = true;
+        pass.disabled = true;
+    });
+
+    window.api.receive("resetInput", _ => {
+        //reset both input boxes from disabled to enabled.
+        email.disabled = false;
+        pass.disabled = false;
     });
 
     email.addEventListener('keypress' ,(key) => {
@@ -56,11 +69,16 @@ window.onload = function() {
         console.log(key);
 
         if(key.key == 'Enter'){
+            console.log("LOGINING!")
             var data = {
                 Email: email.value,
                 Pass: pass.value,
             };
             window.api.send("login",data);
+
+            //disable input onto the input boxes : email & pass
+            email.disabled = true;
+            pass.disabled = true;
         }
     });
 
@@ -69,11 +87,16 @@ window.onload = function() {
         console.log(key);
 
         if(key.key == 'Enter'){
+            console.log("LOGINING!")
             var data = {
                 Email: email.value,
                 Pass: pass.value,
             };
             window.api.send("login",data);
+
+            //disable input onto the input boxes : email & pass
+            email.disabled = true;
+            pass.disabled = true;
         }
     });
 }

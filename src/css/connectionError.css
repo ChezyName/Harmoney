@@ -1,0 +1,105 @@
+#html{
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+html::-webkit-scrollbar {
+    display: none;
+}
+
+#main{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overflow-y: hidden;
+    overflow-x: hidden;
+}
+
+#topBar{
+    height: 24px;
+    width: 100%;
+    float: top center;
+    background-color: var(--backgroundPrimary);
+    text-align: center;
+    color: var(--text);
+    -webkit-app-region: drag;
+}
+
+#topBar #Title{
+    width:30%;
+    height:100%;
+    line-height: 32px;
+    color: var(--text);
+    font-size: 1.2em;
+    font-weight: bold;
+    float:left;
+    padding: 0 0 0 1em;
+}
+
+#topBar #close{
+    float: right;
+    height:100%;
+    width: 32px;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 5px;
+    -webkit-app-region: no-drag;
+    -webkit-user-select: none;
+    user-select: none;
+    font-size: 1.5em;
+    background-color: var(--topbarButtons);
+    transition: all ease-in .2s;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+#topBar #close:hover{
+    background-color: var(--topbarCloseHover);
+}
+
+#contents{
+    width: 100%;
+    height: calc(100% - 24px);
+    position:absolute;
+    background-color: var(--backgroundSecondary);
+    left: 0%;
+    top: calc(0% + 24px);
+    z-index: 1;
+    transition: left .65s ease-in;
+    -webkit-transition: left .65s ease-in-out;
+
+    border: 3px solid var(--backgroundPrimary);
+}
+
+#contents *{
+    text-align: center;
+    color: var(--text);
+    width: 100% !important
+}
+
+#top,#bottom{
+    text-align: center !important;
+    width: 100%;
+    height: calc(60%/2);
+    font-weight: bold;
+    font-size: 1.4em;
+    display: table;
+    margin: 0 auto;
+}
+
+#top{
+    float: top center !important;
+    margin-top: 2.5px !important;
+}
+#bottom{
+    position: absolute;
+    bottom: -22.5%;
+}
+
+#loadingring{
+    width: 100%;
+    height: 50%;
+    z-index: 5;
+}

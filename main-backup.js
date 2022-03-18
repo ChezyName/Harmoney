@@ -55,7 +55,6 @@ const { Z_ASCII } = require('zlib');
 
 var Settings = new HarmoneySettings();
 
-var userpass = path.join(__dirname, "login.data");
 var Appdata = path.join(app.getPath('appData'),"/HarmoneyData/");
 console.log(Appdata);
 var filename = path.join(Appdata, "harmoneyData.data");

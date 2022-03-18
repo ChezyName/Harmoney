@@ -29,10 +29,10 @@ var appData = path.join(app.getPath('appData'),"/HarmoneyData/");
 var appLoc = path.join(appData,"/Harmoney/");
 var version = path.join(appData,"/ver.json");
 var temp = path.join(appData,"/Temp/");
-
+n 
 if(!fs.existsSync(appData)) fs.mkdir(appData, (err) => {});
 if(!fs.existsSync(appLoc)) fs.mkdir(appLoc, (err) => {});
-if(!fs.existsSync(temp)) fs.mkdir(tmp, (err) => {});
+if(!fs.existsSync(temp)) fs.mkdir(temp, (err) => {});
 if(!fs.existsSync(version)) fs.writeFile(version, JSON.stringify(""), (err) => {});
 
 //main func

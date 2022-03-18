@@ -5,7 +5,9 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ./main.js"
+    "start": "electron ./main.js",
+    "build": "electron-builder --win portable",
+    "make": "npx @electron-forge/cli make"
   },
   "repository": {
     "type": "git",
@@ -22,5 +24,9 @@
     "node-fetch": "^3.2.0",
     "node-fetch-progress": "^1.0.2",
     "uaup-js": "^0.0.22"
+  },
+  "devDependencies": {
+    "electron": "^17.0.0",
+    "electron-builder": "22.10.5"
   }
 }

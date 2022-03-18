@@ -22,6 +22,7 @@
     font-weight: bold;
     float:left;
     padding: 0 0 0 1em;
+    -webkit-app-region: drag !important;
 }
 
 #container nav #buttons{
@@ -124,7 +125,7 @@
     text-overflow: ellipsis;
 }
 
-#FriendHolder *:not(.hide){
+#FriendHolder *:not(.hide):not(.onCall){
     float: center top;
     width: 100%;
     height: 50px;
@@ -139,6 +140,28 @@
     margin-bottom: 2.5px;
 
     background-color: var(--interactble);
+    overflow: hidden;
+
+    text-align: center;
+}
+
+#FriendHolder .onCall{
+    float: center top;
+    width: 100%;
+    height: 50px;
+    display:block;
+    padding: 0 0 0 0;
+
+    text-align: center;
+    font-size: 80%;
+    font-weight: bold;
+
+    margin-top: 2.5px;
+    margin-bottom: 2.5px;
+
+    transition: background-color 0.3s ease-in-out;
+
+    background-color: var(--interactble*2.5);
     overflow: hidden;
 
     text-align: center;
@@ -206,21 +229,35 @@
 #Top_BG{
     position: absolute;
     background-color: var(--outlines);
-    width: calc(100% - 40px);;
+    width: calc(100% - 128px);;
     height: 38px;
     top: 0% !important;
-    left: calc(0% + 40px) !important;
+    left: calc(0% + 128px) !important;
+    z-index: 256;
 }
 
 #TopName{
     position: relative;
-    width: 100%;
+    width: calc(100% - 64px);
     height: 100%;
-    text-align: right;
+    text-align: left;
     font-size: 2em;
     font-weight: bold;
     color: var(--text);
     background-color: transparent !important;
+    float: left;
+}
+
+#CallButton{
+    position: relative;
+    width: 64px;
+    height: 100%;
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--text);
+    background-color: transparent !important;
+    float: center;
+    text-align: center;
 }
 
 #submitBtn{
@@ -312,12 +349,13 @@
 
 #messeges{
     width: calc(100% - 130px);
-    height: calc(100% - 40px);
+    height: calc(100% - 78px);
     background-color: var(--backgroundSecondary);
     z-index: 1;
     float: center right;
     position: absolute;
     left: 130px;
+    top: 38px;
     overflow: auto;
     overflow-y: auto;
     overflow-x: hidden;
@@ -340,7 +378,7 @@
     border-radius: 10px;
 }
 
-#messeges *:not(.Image){
+#messeges *:not(.Image):not(#tutorial){
     width: calc(60%);
     height:auto;
     min-height: 10px;
@@ -395,4 +433,10 @@
 
 #messeges .Button:hover{
     background-color: var(--interactbleHover);
+}
+
+#tutorial{
+    width: 100%;
+    height: 100%;
+    z-index: 99999;
 }

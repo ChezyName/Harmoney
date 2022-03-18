@@ -130,6 +130,10 @@ html::-webkit-scrollbar {
     transition: left 2.5 ease-in;
 }
 
+#EmailBox:disabled , #PassBox.disabled{
+    filter: brightness(85%);
+}
+
 #ShowPassword{
     width: 25px;
     height: 40px;

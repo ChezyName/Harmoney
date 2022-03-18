@@ -1,7 +1,5 @@
-#html{
+html *{
     overflow: hidden;
-    overflow-y: hidden;
-    overflow-x: hidden;
 }
 
 html::-webkit-scrollbar {
@@ -123,7 +121,14 @@ html::-webkit-scrollbar {
     background-color: var(--interactbleHover);
 }
 
-#accept *{
+#accfr{
+    width: 100%;
+    height: calc(100% - 32px) !important;
+    background-color: var(--backgroundSecondary) !important;
+    overflow-y: scroll !important;
+}
+
+#Sbox{
     width: 100%;
     height: 32px !important;
     background-color: var(--interactble) !important;
@@ -135,6 +140,41 @@ html::-webkit-scrollbar {
     font-weight: bold;
 }
 
-#accept *:hover{
+#accfr *{
+    width: 100%;
+    height: 32px !important;
+    background-color: var(--interactble) !important;
+    color: var(--text);
+    font-size: 1.5em;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+#accfr *:hover{
     background-color: var(--interactbleHover);
+}
+
+#accfr *.hide{
+    display:none;
+}
+
+/* Scroll bar functionality for SIDEBAR */
+*::-webkit-scrollbar {
+    width: 0px !important;
+    background-color: transparent !important;
+    display: none;
+}
+*::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px var(--scrollMain) !important; 
+    border-radius: 0px !important;
+    display: none;
+}
+
+/* Handle */
+*::-webkit-scrollbar-thumb {
+    background: var(--scrollScnd) !important;
+    border-radius: 0px !important;
+    display: none;
 }
