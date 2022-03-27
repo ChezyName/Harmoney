@@ -28,7 +28,13 @@ function isValidUrl(_string){
 
 window.onload = function() {
     //load the webRTC client JS Script
-    webRTC.onLoad();
+    //webRTC.onLoad();
+
+    var topBar = document.getElementById("Top_BG");
+    var style = topBar.style.display;
+    topBar.style.display = "none";
+
+    var friendName = document.getElementById("TopName");
 
     var closeBtn = document.getElementById('close');
     var minBtn = document.getElementById('minimize');
@@ -52,8 +58,11 @@ window.onload = function() {
     var mParent = document.getElementById('messeges');
     var search = document.getElementById('search');
 
+    //var call = document.getElementById('CallButton');
+
     var frbds = [];
     var fButtons = [];
+    var currentFriend = null;
     window.api.receive("getF",(data) => {
         console.log(data);
         // if friends list did not change return
@@ -73,10 +82,12 @@ window.onload = function() {
                 b.name = data[i].uid;
                 b.addEventListener("click", _ =>{
                     //call the api to accept the request
-
+                    currentFriend = b.name;
                     console.log("Clicked On Friend: " + b.innerHTML + " WITH UID: " + b.name);
                     friendName.innerHTML = b.innerHTML;
                     window.api.send("messageFriend",{uid: b.name, name: b.innerHTML});
+                    topBar.style.display = style;
+                    friendName.innerHTML = b.innerHTML;
                 });
                 //add button as the child of accept / acc
                 fParent.appendChild(b);
@@ -117,6 +128,12 @@ window.onload = function() {
                 user.classList.toggle("hide",!isVisible);
             }
         });
+    });
+
+    window.api.receive("PlaySound",async (link) => {
+        console.log("Playing: " + link);
+        var audio = new Audio(link);
+        audio.play();
     });
 
     var lastMsgs;
@@ -222,6 +239,13 @@ window.onload = function() {
 
         lastMsgs = data;
     });
+
+    /*
+    call.addEventListener("click", function(){
+        if(currentFriend == null) return;
+        //webRTC.call(currentFriend);
+    });
+    */
 
     search.addEventListener('keypress' ,(key) => {
         if(fButtons == null || fButtons == undefined) return;
@@ -339,10 +363,13 @@ window.onload = function() {
     });
 
     // set the title of the app to Harmoney / username of the user 
-    window.api.receive("SentUsername", (name) => {
-        console.log(name);
-        title.innerHTML = "Harmoney/" + name;
+    window.api.receive("SentUsername", (data) => {
+        console.log(data.name);
+        title.innerHTML = "Harmoney/" + data.name;
         //userTexting.innerHTML = "  Welcome, " + name + ".";
+
+        console.log("Recived The User's Unique ID : UID -> " + data.uid);
+        //webRTC.createUser(data.uid);
     });
 
     addF.addEventListener('click', _ => {

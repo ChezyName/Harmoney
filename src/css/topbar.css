@@ -378,7 +378,7 @@
     border-radius: 10px;
 }
 
-#messeges *:not(.Image):not(#tutorial){
+#messeges *:not(.Image):not(#tutorial):not(#CallerAnswerOBJ){
     width: calc(60%);
     height:auto;
     min-height: 10px;
@@ -406,6 +406,24 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
     text-overflow: ellipsis;
+}
+
+#messeges #CallerAnswerOBJ{
+    width: calc(60%);
+    background-color: var(--backgroundPrimary);
+    z-index: 999;
+    margin: 5px;
+    color: var(--text);
+    font-weight: bold;
+    font-size: 1.5em;
+    text-align: center;
+    overflow-y: auto;
+    -webkit-user-drag: none; 
+    -khtml-user-drag: none; 
+    -moz-user-drag: none; 
+    -o-user-drag: none; 
+    transition: all ease-in-out .2s;
+    display:inline-block;
 }
 
 #messeges .otherMessege{

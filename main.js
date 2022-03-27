@@ -4,6 +4,7 @@ const ProgressBar = require('electron-progressbar');
 
 //last call will be removed login out, closing the app, or making a new call
 var lastMadeCall = null;
+var wasAnswer = false;
 
 const firebase = require('firebase')
 require("firebase/auth");
@@ -13,13 +14,6 @@ const uuidv1 = require("uuidv1");
 
 const firebaseConfig = {
     // CANT SHOW THESE LMAO
-    apiKey: "AIzaSyBwkOA4AggcZC6TcqPIaSsjwzQmrccIIkQ",
-    authDomain: "project-harmoney.firebaseapp.com",
-    projectId: "project-harmoney",
-    storageBucket: "project-harmoney.appspot.com",
-    messagingSenderId: "1023335689095",
-    appId: "1:1023335689095:web:3ea0e4913d258a0cecc122",
-    measurementId: "G-PSB6RFFMCM"
 };
 
 var currentUser;
@@ -40,6 +34,7 @@ const store = firebase.storage().ref();
 const db = firebase.firestore();
 
 let allUsers = db.collection('allUsers');
+let allCalls = db.collection('allCalls');
 
 // class for all data and setings to be held in once filename
 class HarmoneySettings {
@@ -128,6 +123,16 @@ function writeUserData(UserId, data) {
     });
 }
 
+var hasGoodbyed = false;
+
+function playSound(linkToSound){
+    console.log("Checking If Playing Sound Or Naw")
+    if(win == undefined || win == null) return;
+    console.log("Playing Sound To The WEB Client!");
+    //play the sound on the MAIN process
+    win.webContents.send("PlaySound",path.resolve("sounds/" + linkToSound));
+}
+
 var creatingMain = false;
 async function createMain() {
     // closing if already opened
@@ -138,7 +143,7 @@ async function createMain() {
     
     if(creatingMain == true) return;
     if (!app.requestSingleInstanceLock()) {
-        app.exit();
+        app.quit();
     }
     let oldWin = win;
     creatingMain = true;
@@ -168,6 +173,7 @@ async function createMain() {
     newWin.loadFile('src/html/main.html')
 
     async function fullyClose(){
+        playSound('Goodbye.mp3');
         console.log("Closing... => " + lastMadeCall);
         if(lastMadeCall != null && lastMadeCall != undefined){
             console.log("removing From Firebase")
@@ -178,12 +184,28 @@ async function createMain() {
                 var data = document.data();
                 console.log(data.uid);
                 var calls = data.calls;
-                for(var i = 0; calls.length; i++){
-                    if(calls[i].uid == currentUser.uid){
-                        calls.splice(i, 1);
-                        break;
+
+                /*
+                if(wasAnswer == true){
+                    for(var i = 0; calls.length; i++){
+                        if(calls[i].answeruid == currentUser.uid){
+                            calls[i].answer = {};
+                            break;
+                        }
                     }
                 }
+                else{
+                    for(var i = 0; calls.length; i++){
+                        if(calls[i].uid == currentUser.uid){
+                            calls.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                */
+
+                calls = [];
+
                 data.calls = calls;
                 usersDoc.set(data, {merge: true})
                 .then(_ => {
@@ -192,7 +214,7 @@ async function createMain() {
                     if (process.platform !== 'darwin') {
                         console.log("bye bye...");
                         lastMadeCall = null;
-                        app.quit();
+                        playBye();
                     }
                 });
             })
@@ -202,7 +224,7 @@ async function createMain() {
         else{
             if (process.platform !== 'darwin') {
                 console.log("bye bye...");
-                app.quit();
+                playBye();
             }
         }
     }
@@ -239,7 +261,15 @@ async function createMain() {
         getT().then((value) => {
             //win.openDevTools();
             win.setSize(Settings.Width, Settings.Height);
-            win.webContents.send("SentUsername", userName);
+            //welcome to harmoney SFX
+            playSound('WELCOME.mp3');
+
+            //send the UID to the webRTC Client
+            console.log();
+            console.log("UID -> :=: == " + currentUser.uid);
+            console.log();
+
+            win.webContents.send("SentUsername", {name: userName, uid: currentUser.uid});
             win.show();
             setTheme();
             if (loginWin != null) loginWin.close();
@@ -248,7 +278,19 @@ async function createMain() {
         win.on('close', e => { // Line 49
             if(lastMadeCall == null || lastMadeCall == undefined)
             {
-                app.quit();
+                if(hasGoodbyed){
+                    app.quit();
+                }
+                else{
+                    e.preventDefault()
+                    //1.262s
+                    e.preventDefault()
+                    playSound('Goodbye.mp3');
+                    setTimeout(() =>{
+                        hasGoodbyed = true;
+                        app.quit();
+                    },1262)
+                }
             }
             else{
                 e.preventDefault()
@@ -273,18 +315,46 @@ async function createMain() {
     });
     app.on("window-all-closed", e => {
         if(win != null || fwin != null || loginWin != null) return;
-        e.preventDefault()
         try{
+            e.preventDefault()
             fullyClose();
         }
         catch{
-            //app.quit();
+            if(hasGoodbyed){
+                app.quit();
+            }
+            else{
+                e.preventDefault()
+                //1.262s
+                e.preventDefault()
+                playSound('Goodbye.mp3');
+                setTimeout(() =>{
+                    hasGoodbyed = true;
+                    app.quit();
+                },1262)
+            }
         }
     });
 }
+var closing = false;
 //IPC Events
-ipcMain.on("close", (event, args) => {
-    app.quit();
+ipcMain.on("close", (e, args) => {
+    if(closing) return;
+    closing = true;
+
+    if(hasGoodbyed){
+        app.quit();
+    }
+    else{
+        e.preventDefault()
+        //1.262s
+        e.preventDefault()
+        playSound('Goodbye.mp3');
+        setTimeout(() =>{
+            hasGoodbyed = true;
+            app.quit();
+        },1262)
+    }
 });
 ipcMain.on("msg", (event, args) => {
     showMessage("ERROR", args);
@@ -554,19 +624,47 @@ ipcMain.on("signOut", _ => {
         fs.unlinkSync(userpass);
         //remove the autoLoginfile
         if(lastMadeCall != null && lastMadeCall != undefined){
-            //remove the call off of firebase
-            getUserData(lastMadeCall).then((data) => {
-                for(var i = 0; i < data.calls; i++){
-                    if(calls[i].uid == currentUser.uid){
-                        //remove from list and set
-                        calls.splice(i, 1);
-                        break;
+            console.log("Closing... => " + lastMadeCall);
+            if(lastMadeCall != null && lastMadeCall != undefined){
+                console.log("removing From Firebase")
+                //remove the call off of firebase
+    
+                var usersDoc = allUsers.doc(lastMadeCall)
+                usersDoc.get().then((document) => {
+                    var data = document.data();
+                    console.log(data.uid);
+                    var calls = data.calls;
+
+                    if(wasAnswer == true){
+                        for(var i = 0; calls.length; i++){
+                            if(calls[i].answeruid == currentUser.uid){
+                                calls[i].answer = {};
+                                break;
+                            }
+                        }
                     }
-                }
-                writeUserData(lastMadeCall,data).then(_ =>{
-                    createLogin();
-                });
-            });
+                    else{
+                        for(var i = 0; calls.length; i++){
+                            if(calls[i].uid == currentUser.uid){
+                                calls.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
+
+                    data.calls = calls;
+                    usersDoc.set(data, {merge: true})
+                    .then(_ => {
+                        console.log("removed! closing the app soon...");
+                        createLogin();
+                    });
+                })
+    
+                console.log("Why Skipped?");
+            }
+            else{
+                createLogin();
+            }
         }
         else{
             createLogin();
@@ -923,6 +1021,7 @@ ipcMain.on("GetPP", _ => {
 });
 
 var userUpdater;
+var messageUpdater;
 
 //function to fully login user and alow them to
 // use the full app and save email+password
@@ -940,9 +1039,23 @@ function onFinishLogin(user, email, pass) {
     //update the users
     userUpdater = allUsers.doc(currentUser.uid).onSnapshot({},(doc) => {
         //update friend requests
-        updateFR(doc.data);
-        getAllFriendsWithDoc(doc.data);
+        updateFR(doc.data());
+        getAllFriendsWithDoc(doc.data());
+        checkForCalls(doc.data());
     });
+
+    messageUpdater = allMsgs.onSnapshot({}, (snapshot) => {
+        snapshot.forEach((doc) => {
+            if(doc.exists){
+                console.log(doc.exists + "/" + doc.id);
+                var docName = doc.id;
+                if(docName.includes(currentUser.uid)){
+                    //play sfx
+                    playSound('HarmoneyNotificationSFX.mp3');
+                }
+            }
+        });
+    })
 
     getUserData(currentUser.uid).then((data) => {
         UserData = data;
@@ -1194,7 +1307,7 @@ async function getAllFriends() {
 
 //open links ect
 const open = require('open');
-const { data } = require('jquery');
+//const { data } = require('jquery');
 ipcMain.on("openLink",(event, args) => {
     console.log("================================> OPENING FILE!");
     console.log(args);
@@ -1342,52 +1455,82 @@ ipcMain.on("messageFriend", (event, data) => {
             .uid, currentFriendUID);
 }); 
 
+function getLargerID(){
+    var myID = currentUser.uidreplace(/\D/g, '');
+    var otherID = currentFriendUID.replace(/\D/g, '');
+    var ID;
+    if (myID.length > otherID.length) {
+        ID = from + to;
+    } else {
+        ID = to + from;
+    }
+    return ID;
+}
+
+var updatedDoc = null;
 ipcMain.on("sendoffer",(event,offer) => {
-    console.log(offer);
-    getUserData(currentFriendUID).then((userData) => {
-        lastMadeCall = currentFriendUID;
-        var calls = userData.calls;
-        var index = -1;
-        if(calls == null || calls == undefined){
-            calls = [];
-        }
+    //send offer in new db collection
+    var documentName = getLargerID();
+    var caller = {offer: offer,uid: currentUser.uid};
+    var answer = {offer: null,uid: null};
 
-        for(var i = 0; i < calls.length; i++){
-            if(calls[i].uid == currentUser.uid){
-                index = i;
-                break;
-            }
-        }
+    allCalls.doc(documentName).get()
+    .then((doc) => {
+        //get the document data values
+        var callerData = {};
+        var data = doc.data();
+        var caller = true;
 
-        if(index == -1){
-            calls.push({offer: offer, uid: currentUser.uid, answer: {}});
+        if(doc.exists){
+            callerData.caller = data.caller;
+            callerData.answer = caller;
+            caller = false;
+
+            //send back true becuase you called
+            //webRTC.sendBackCall();
         }
         else{
-            calls[index] = {offer: offer, uid: currentUser.uid, answer: {}};
+            callerData.caller = caller;
+            callerData.answer = null;
         }
 
-        userData.calls = calls;
+        //save the new document
+        allCalls.doc(documentName).set(callerData, {merge: true});
+        
+        //remove old snapshot watcher
+        if(updatedDoc != null){
+            updatedDoc();
+            updatedDoc = null;
+        }
 
-        writeUserData(currentFriendUID,userData);
-    });
+        //skip if has answered the call
+        if(caller == true){
+            //watch the document for any updates
+            updatedDoc = allCalls.doc(documentName).onSnapshot((doc) => {
+                //wait for caller updates
+                var data = doc.data();
+
+                if(data.answer != null){
+                    //answer the call and scrap the document updater
+                    //webRTC.sendBackCall();
+
+                    //scrap the updateFR
+                    updatedDoc();
+                    updatedDoc = null;
+                }
+            });
+        }
+    })
 });
 
 var lastCalls = [];
-function checkForCalls(){
-    allUsers.doc(UserId).onSnapshot((doc) => {
-        var data = doc.data();
-        if(lastCalls != data.calls){
-            lastCalls = data;
-            //play call sound FX & send Calls back To User
-            win.webContents.send("rcalls",lastCalls);
-        }
-    });
+function checkForCalls(data){
+    //look for call updates
 }
 
 ipcMain.on("sendMsg", (event, msg) => {
     if (msg == "" || msg == null || msg == undefined) {
-        showMessage
-            ("ERROR", "Sent Message Is Undefined");
+        //showMessage("ERROR", "Sent Message Is Undefined");
         return;
     }
     if (currentFriendUID == null || currentFriendUID == "" || currentFriendUID == undefined) {
