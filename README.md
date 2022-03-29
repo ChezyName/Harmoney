@@ -7,7 +7,7 @@ Carrot - idk I took ~~Google's~~ Colors. Harmony, give users full data privacy b
 ## Custom Themes
 Custom themes are one of the greatest things to be added to Harmoney. the endless possibility to change anything you dislike of the color scheme without making the app using your own firebase SDK.
 
-Either you can start from scratch or use the template below, id recommend using the template as in *Visual Studio Code* you can 
+Either you can start from scratch or use the template below, id recommend using the template as is, in *Visual Studio Code* becuase in *VS Code* it allows you to select colors with a color picker, and write color values as well.
 
 ```
 :root{
