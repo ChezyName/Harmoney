@@ -5,6 +5,7 @@ const ProgressBar = require('electron-progressbar');
 //last call will be removed login out, closing the app, or making a new call
 var lastMadeCall = null;
 var wasAnswer = false;
+var customThemes = {};
 
 const firebase = require('firebase')
 require("firebase/auth");
@@ -60,6 +61,7 @@ console.log(Appdata);
 var filename = path.join(Appdata, "harmoneyData.data");
 var userpass = path.join(Appdata, "login.data");
 var tmp = path.join(Appdata, "/temp/");
+var themeFolder = path.join(Appdata,"/Themes/");
 
 var epassD = {
     Email: "",
@@ -69,6 +71,7 @@ var epassD = {
 //make the files if they dont exist
 if(!fs.existsSync(Appdata)) fs.mkdir(Appdata, (err) => {});
 if(!fs.existsSync(tmp)) fs.mkdir(tmp, (err) => {});
+if(!fs.existsSync(themeFolder)) fs.mkdir(themeFolder, (err) => {});
 
 if(!fs.existsSync(filename)) fs.writeFile(filename, "", (err) => {});
 if(!fs.existsSync(userpass)) fs.writeFile(userpass, JSON.stringify(epassD), (err) => {});
@@ -100,6 +103,33 @@ function getUserData(UserId) {
             resolve(null);
         });
     })
+}
+
+async function getAllThemes(){
+    customThemes = [];
+    //getting the custom themes
+    fs.readdir(themeFolder, function (err, files) {
+        //handling error
+        if (err) {
+            return console.log('Unable to scan directory: ' + err);
+        } 
+        //listing all files using forEach
+        files.forEach(function (file) {
+            //check if file ends with a .css extension
+            if(path.extname(file) == '.css'){
+                //add to the customThemes array
+                customThemes.push(file);
+            }
+        });
+
+        //send the themes to settings window
+        console.log("Sending The Custom Themes.")
+        console.log(customThemes);
+        if(Set != null){
+            console.log("sending to webContents : " + customThemes);
+            Set.webContents.send("CustomThemes",customThemes);
+        }
+    });
 }
 
 //same as above but instead, it writes the data to firebase.
@@ -388,10 +418,11 @@ ipcMain.on("GetUsername", _ => {
 });
 
 function setTheme() {
-    var file = path.join(__dirname, `Themes/${Settings.Theme}.css`);
+    var file = path.join(__dirname, `src/css/Themes/${Settings.Theme}.css`);
+    var customFileloc = path.join(themeFolder,`${Settings.Theme}.css`);
     //console.log(file);
     //console.log(fs.existsSync(path.join(file)));
-    if (!fs.existsSync(filename) || Settings.Theme == "Dark") {
+    if (Settings.Theme == "Dark") {
         //console.log(path.join(__dirname,"src/css/Themes/Dark.css"));
         win.webContents.send("MainChanged",
             path.join(__dirname, "src/css/Themes/Dark.css"), "Dark");
@@ -403,7 +434,8 @@ function setTheme() {
             fwin.webContents.send("MainChanged",
                 path.join(__dirname, "src/css/Themes/Dark.css"), "Dark");
         }
-    } else {
+    } 
+    else if(fs.existsSync(file)) {
         //console.log(file);
         win.webContents.send("MainChanged", file);
         if (Set != null) {
@@ -411,6 +443,29 @@ function setTheme() {
         }
         if (fwin != null) {
             fwin.webContents.send("MainChanged", file);
+        }
+    }
+    else if(fs.existsSync(customFileloc)){
+        //console.log(file);
+        win.webContents.send("MainChanged", customFileloc);
+        if (Set != null) {
+            Set.webContents.send("MainChanged", customFileloc, Settings.Theme);
+        }
+        if (fwin != null) {
+            fwin.webContents.send("MainChanged", customFileloc);
+        }
+    }
+    else{
+        //console.log(path.join(__dirname,"src/css/Themes/Dark.css"));
+        win.webContents.send("MainChanged",
+        path.join(__dirname, "src/css/Themes/Dark.css"), "Dark");
+        if (Set != null) {
+            Set.webContents.send("MainChanged",
+                path.join(__dirname, "src/css/Themes/Dark.css"), "Dark");
+        }
+        if (fwin != null) {
+            fwin.webContents.send("MainChanged",
+                path.join(__dirname, "src/css/Themes/Dark.css"), "Dark");
         }
     }
 }
@@ -437,9 +492,10 @@ function SettingsMenu() {
     })
     Set.loadFile('src/html/settings.html')
     Set.webContents.once('did-finish-load', function() {
-        //Set.openDevTools();
+        Set.openDevTools();
         Set.show();
         setTheme();
+        getAllThemes();
     });
     Set.on("closed", () => {
         // Dereference the window object, usually you would store windows

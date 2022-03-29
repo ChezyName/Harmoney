@@ -2,6 +2,10 @@
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const ProgressBar = require('electron-progressbar');
 
+//last call will be removed login out, closing the app, or making a new call
+var lastMadeCall = null;
+var wasAnswer = false;
+
 const firebase = require('firebase')
 require("firebase/auth");
 require("firebase/storage");
@@ -10,13 +14,6 @@ const uuidv1 = require("uuidv1");
 
 const firebaseConfig = {
     // CANT SHOW THESE LMAO
-    apiKey: "",
-    authDomain: "",
-    projectId: "",
-    storageBucket: "",
-    messagingSenderId: "",
-    appId: "",
-    measurementId: ""
 };
 
 var currentUser;
@@ -35,6 +32,9 @@ firebase.initializeApp(firebaseConfig);
 const Auth = firebase.auth();
 const store = firebase.storage().ref();
 const db = firebase.firestore();
+
+let allUsers = db.collection('allUsers');
+let allCalls = db.collection('allCalls');
 
 // class for all data and setings to be held in once filename
 class HarmoneySettings {
@@ -59,8 +59,6 @@ var Appdata = path.join(app.getPath('appData'),"/HarmoneyData/");
 console.log(Appdata);
 var filename = path.join(Appdata, "harmoneyData.data");
 var userpass = path.join(Appdata, "login.data");
-
-var ver = path.join(Appdata, "version.data");
 var tmp = path.join(Appdata, "/temp/");
 
 var epassD = {
@@ -74,7 +72,6 @@ if(!fs.existsSync(tmp)) fs.mkdir(tmp, (err) => {});
 
 if(!fs.existsSync(filename)) fs.writeFile(filename, "", (err) => {});
 if(!fs.existsSync(userpass)) fs.writeFile(userpass, JSON.stringify(epassD), (err) => {});
-if(!fs.existsSync(ver)) fs.writeFile(userpass, JSON.stringify(""), (err) => {});
 
 // all variables for the browser window instances
 var Set = null;
@@ -82,12 +79,71 @@ var loginWin = null;
 var win = null;
 var fwin = null;
 
+//gets the users data and returns it back to via a promise.
+function getUserData(UserId) {
+    return new Promise((resolve) => {
+        if(UserId == null || UserId == undefined || UserId == "") resolve(null);
+        console.log("UID =>" + UserId + "-END");
+        allUsers.doc(UserId).get()
+        .then((doc) => {
+            if (doc.exists) {
+                //console.log(doc.data());
+                console.log("Returning Document");
+                resolve(doc.data());
+            } else {
+                console.log("DocIsNonExsistent!");
+                resolve(null);
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            resolve(null);
+        });
+    })
+}
+
+//same as above but instead, it writes the data to firebase.
+function writeUserData(UserId, data) {
+    return new Promise((resolve) => {
+        var databasedoc = allUsers.doc(UserId)
+        //console.log("==========================================================");
+        //console.log(UserId);
+        //console.log("==============");
+        //console.log(data);
+        //console.log("==========================================================");
+        databasedoc.set(data, {merge: true})
+        .then(_ => {
+            //console.log('Saved Data Good :D');
+            resolve();
+        })
+        .catch(err => {
+            //console.log("error wriritng to doc: " + err);
+            resolve();
+        });
+    });
+}
+
+var hasGoodbyed = false;
+
+function playSound(linkToSound){
+    console.log("Checking If Playing Sound Or Naw")
+    if(win == undefined || win == null) return;
+    console.log("Playing Sound To The WEB Client!");
+    //play the sound on the MAIN process
+    win.webContents.send("PlaySound",path.resolve("sounds/" + linkToSound));
+}
+
 var creatingMain = false;
 async function createMain() {
     // closing if already opened
+    if(win != null){
+        win.show();
+        return;
+    }
+    
     if(creatingMain == true) return;
     if (!app.requestSingleInstanceLock()) {
-        app.exit();
+        app.quit();
     }
     let oldWin = win;
     creatingMain = true;
@@ -116,8 +172,66 @@ async function createMain() {
 
     newWin.loadFile('src/html/main.html')
 
+    async function fullyClose(){
+        playSound('Goodbye.mp3');
+        console.log("Closing... => " + lastMadeCall);
+        if(lastMadeCall != null && lastMadeCall != undefined){
+            console.log("removing From Firebase")
+            //remove the call off of firebase
+
+            var usersDoc = allUsers.doc(lastMadeCall)
+            usersDoc.get().then((document) => {
+                var data = document.data();
+                console.log(data.uid);
+                var calls = data.calls;
+
+                /*
+                if(wasAnswer == true){
+                    for(var i = 0; calls.length; i++){
+                        if(calls[i].answeruid == currentUser.uid){
+                            calls[i].answer = {};
+                            break;
+                        }
+                    }
+                }
+                else{
+                    for(var i = 0; calls.length; i++){
+                        if(calls[i].uid == currentUser.uid){
+                            calls.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                */
+
+                calls = [];
+
+                data.calls = calls;
+                usersDoc.set(data, {merge: true})
+                .then(_ => {
+                    console.log("removed! closing the app soon...");
+                    
+                    if (process.platform !== 'darwin') {
+                        console.log("bye bye...");
+                        lastMadeCall = null;
+                        playBye();
+                    }
+                });
+            })
+
+            console.log("Why Skipped?");
+        }
+        else{
+            if (process.platform !== 'darwin') {
+                console.log("bye bye...");
+                playBye();
+            }
+        }
+    }
+
     newWin.webContents.once('did-finish-load', function() {
         creatingMain = false;
+        loginWin.close();
         //win.show();
         //if(win != null) win.close();
         win = newWin;
@@ -147,15 +261,43 @@ async function createMain() {
         getT().then((value) => {
             //win.openDevTools();
             win.setSize(Settings.Width, Settings.Height);
-            win.webContents.send("SentUsername", userName);
+            //welcome to harmoney SFX
+            playSound('WELCOME.mp3');
+
+            //send the UID to the webRTC Client
+            console.log();
+            console.log("UID -> :=: == " + currentUser.uid);
+            console.log();
+
+            win.webContents.send("SentUsername", {name: userName, uid: currentUser.uid});
             win.show();
             setTheme();
             if (loginWin != null) loginWin.close();
         })
 
-        win.on('closed', _ => {
-            app.exit();
+        win.on('close', e => { // Line 49
+            if(lastMadeCall == null || lastMadeCall == undefined)
+            {
+                if(hasGoodbyed){
+                    app.quit();
+                }
+                else{
+                    e.preventDefault()
+                    //1.262s
+                    e.preventDefault()
+                    playSound('Goodbye.mp3');
+                    setTimeout(() =>{
+                        hasGoodbyed = true;
+                        app.quit();
+                    },1262)
+                }
+            }
+            else{
+                e.preventDefault()
+                fullyClose();
+            }
         });
+        
         //save every time window size was changed
         win.on('resize', function() {
             var size = win.getSize();
@@ -163,23 +305,56 @@ async function createMain() {
             Settings.Height = size[1];
             saveTheme();
         });
-        win.on("closed", () => {
+        win.on("closed", e => {
+            e.preventDefault()
             // Dereference the window object, usually you would store windows
             // in an array if your app supports multi windows, this is the time
             // when you should delete the corresponding element.
             win = null;
         });
     });
-    app.on("window-all-closed", () => {
+    app.on("window-all-closed", e => {
         if(win != null || fwin != null || loginWin != null) return;
-        if (process.platform !== 'darwin') {
-            app.quit();
+        try{
+            e.preventDefault()
+            fullyClose();
+        }
+        catch{
+            if(hasGoodbyed){
+                app.quit();
+            }
+            else{
+                e.preventDefault()
+                //1.262s
+                e.preventDefault()
+                playSound('Goodbye.mp3');
+                setTimeout(() =>{
+                    hasGoodbyed = true;
+                    app.quit();
+                },1262)
+            }
         }
     });
 }
+var closing = false;
 //IPC Events
-ipcMain.on("close", (event, args) => {
-    app.exit();
+ipcMain.on("close", (e, args) => {
+    if(closing) return;
+    closing = true;
+
+    if(hasGoodbyed){
+        app.quit();
+    }
+    else{
+        e.preventDefault()
+        //1.262s
+        e.preventDefault()
+        playSound('Goodbye.mp3');
+        setTimeout(() =>{
+            hasGoodbyed = true;
+            app.quit();
+        },1262)
+    }
 });
 ipcMain.on("msg", (event, args) => {
     showMessage("ERROR", args);
@@ -320,7 +495,7 @@ function showMessage(title, message) {
 var eml;
 var pss;
 // login state
-function createLogin() {
+async function createLogin() {
     loginWin = new BrowserWindow({
         width: 250,
         height: 400,
@@ -340,12 +515,7 @@ function createLogin() {
             preload: path.join(__dirname, 'preload.js'),
         }
     })
-    if (currentUser != null) {
-        // load icon chooser
-        loginWin.loadFile('src/html/completeregister.html');
-    } else {
-        loginWin.loadFile('src/html/login.html');
-    }
+    loginWin.loadFile('src/html/connectionError.html');
     loginWin.on("closed", () => {
         // Dereference the window object, usually you would store windows
         // in an array if your app supports multi windows, this is the time
@@ -353,12 +523,54 @@ function createLogin() {
         loginWin = null;
     });
     loginWin.webContents.once('did-finish-load', function() {
-        //loginWin.openDevTools();
+        loginWin.openDevTools();
+
         loginWin.show();
-        if (win != null) win.hide();
-        if (Set != null) {
-            Set.close();
+        console.log("n WebCont");
+        const dns = require('dns');
+        let findConnection = function(){
+            console.log("n find FuncCOn");
+            return new Promise(resolve => {
+                dns.resolve('www.google.com', function(err) {
+                    if (err) {
+                       console.log("No connection");
+                       resolve(false);
+                    } else {
+                       console.log("Connected");
+                       resolve(true);
+                    }
+                });
+            });
         }
+
+        let complete = function(){
+            console.log("n Complete");
+            //loginWin.openDevTools();
+            autoLogin();
+            loginWin.show();
+            if (win != null) win.hide();
+            if (Set != null) {
+                Set.close();
+            }
+        }
+    
+        // retry connections
+        let retryConn = async function(){
+            console.log("n Retry");
+            var res = await findConnection();
+            if(res == true){
+                complete();
+            }
+            else{
+                //2.5s = 2500ms
+                
+                //commented out, causes loading ring gif to reset
+                //loginWin.loadFile('src/html/connectionError.html');
+                setTimeout(retryConn,2500);
+            }
+        }
+
+        retryConn();
     });
 }
 var trying = false;
@@ -375,6 +587,7 @@ ipcMain.on("login", (event, args) => {
     eml = args.Email;
     pss = args.Pass;
     if (eml == null || pss == null) {
+        loginWin.webContents.send("resetInput");
         showMessage("ERROR", "EMAIL or PASSWORD was 'undefined', please try again.");
         return;
     }
@@ -389,52 +602,14 @@ ipcMain.on("addUser", (event, args) => {
             userName = args.UserName.toLowerCase();;
         }
         //save Profile Picture
-        savePFP(usr);
+        //savePFP(usr);
+        onFinishLogin(currentUser, eml, pss);
     } else {
         showMessage("ERROR", "Could Not Find Account, Retry Login.");
         loginWin.loadFile('src/html/login.html');
     }
 })
-var allUsers = db.collection('allUsers');
 
-function writeUserData(UserId, data) {
-    return new Promise((resolve) => {
-        var databasedoc = allUsers.doc(UserId)
-        //console.log("==========================================================");
-        //console.log(UserId);
-        //console.log("==============");
-        //console.log(data);
-        //console.log("==========================================================");
-        databasedoc.set(data, {merge: true})
-        .then(_ => {
-            //console.log('Saved Data Good :D');
-            resolve();
-        })
-        .catch(err => {
-            //console.log("error wriritng to doc: " + err);
-            resolve();
-        });
-    });
-}
-
-function getUserData(UserId) {
-    return new Promise((resolve) => {
-        allUsers.doc(UserId).get()
-        .then((doc) => {
-            if (doc.exists) {
-                //console.log(doc.data());
-                resolve(doc.data());
-            } else {
-                //console.log("DocIsNonExsistent!");
-                resolve(null);
-            }
-        })
-        .catch((err) => {
-            //console.log(err);
-            resolve(null);
-        });
-    })
-}
 ipcMain.on("changeIcon", _ => {
     createLogin();
 });
@@ -448,7 +623,52 @@ ipcMain.on("signOut", _ => {
         currentUser = null;
         fs.unlinkSync(userpass);
         //remove the autoLoginfile
-        autoLogin();
+        if(lastMadeCall != null && lastMadeCall != undefined){
+            console.log("Closing... => " + lastMadeCall);
+            if(lastMadeCall != null && lastMadeCall != undefined){
+                console.log("removing From Firebase")
+                //remove the call off of firebase
+    
+                var usersDoc = allUsers.doc(lastMadeCall)
+                usersDoc.get().then((document) => {
+                    var data = document.data();
+                    console.log(data.uid);
+                    var calls = data.calls;
+
+                    if(wasAnswer == true){
+                        for(var i = 0; calls.length; i++){
+                            if(calls[i].answeruid == currentUser.uid){
+                                calls[i].answer = {};
+                                break;
+                            }
+                        }
+                    }
+                    else{
+                        for(var i = 0; calls.length; i++){
+                            if(calls[i].uid == currentUser.uid){
+                                calls.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
+
+                    data.calls = calls;
+                    usersDoc.set(data, {merge: true})
+                    .then(_ => {
+                        console.log("removed! closing the app soon...");
+                        createLogin();
+                    });
+                })
+    
+                console.log("Why Skipped?");
+            }
+            else{
+                createLogin();
+            }
+        }
+        else{
+            createLogin();
+        }
     }).catch((error) => {
         // An error happened.
     });
@@ -686,7 +906,8 @@ async function autoLogin() {
     try {
         fs.readFile(userpass, (err, data) => {
             if (err || data == null || data == undefined) {
-                createLogin();
+                console.log("No Data In File!")
+                loginWin.loadFile("src/html/login.html");
                 return;
             }
 
@@ -696,7 +917,8 @@ async function autoLogin() {
                 d = JSON.parse(data);
                 //console.log("E: " + d.Email, + "P: " + d.Pass);
                 if (d.Email == null || d.Pass == null) {
-                    createLogin();
+                    console.log("Null Email and/or Password")
+                    loginWin.loadFile("src/html/login.html");
                     return;
                 }
                 Auth.signInWithEmailAndPassword(d.Email, d.Pass)
@@ -704,24 +926,25 @@ async function autoLogin() {
                     // Signed in
                     currentUser = u.user;
                     //console.log('U: ' + currentUser.uid);
-                    if (currentUser == null) {
-                        createLogin();
-                        return;
-                    }
+                    console.log("Auto Logged In :D")
                     onFinishLogin(currentUser, d.Email, d.Pass);
                 })
                 .catch((error) => {
                     //console.log(error + " Making Login");
-                    createLogin();
+                    console.log("=========== ERROR ===========")
+                    console.log(error);
+                    loginWin.loadFile("src/html/login.html");
                 });
             }
             catch{
-                createLogin();
+                console.log("? Error")
+                loginWin.loadFile("src/html/login.html");
             }
         });
     } catch {
         // file does not exist
-        createLogin();
+        console.log("File No Bueno")
+        loginWin.loadFile("src/html/login.html");
     }
 }
 
@@ -744,6 +967,9 @@ function tryLogin(d) {
         onFinishLogin(currentUser, d.Email, d.Pass);
     })
     .catch((error) => {
+        if(loginWin != null && loginWin != undefined){
+            loginWin.webContents.send("resetInput");
+        }
         showMessage("ERROR", error.message);
         trying = false;
     });
@@ -771,6 +997,7 @@ function tryRegister(email, pass) {
             //console.log(error.code);
             const errorCode = error.code;
             const errorMessage = error.message;
+            loginWin.webContents.send("resetInput");
             showMessage(errorCode, errorMessage);
         }
         trying = false;
@@ -793,17 +1020,43 @@ ipcMain.on("GetPP", _ => {
     //console.log("Returning Useres Icon: " + userIcon);
 });
 
+var userUpdater;
+var messageUpdater;
+
 //function to fully login user and alow them to
 // use the full app and save email+password
 function onFinishLogin(user, email, pass) {
+    //loginWin.webContents.send("resetInput");
     trying = false;
     var d = new userData();
-    d.Email = email;;
+    d.Email = email;
     d.Pass = pass;
     var toJ = JSON.stringify(d);
     // write all data to players file with UserData
     currentUser = user;
     //get current friends + fRequests and all data before overrideing
+    
+    //update the users
+    userUpdater = allUsers.doc(currentUser.uid).onSnapshot({},(doc) => {
+        //update friend requests
+        updateFR(doc.data());
+        getAllFriendsWithDoc(doc.data());
+        checkForCalls(doc.data());
+    });
+
+    messageUpdater = allMsgs.onSnapshot({}, (snapshot) => {
+        snapshot.forEach((doc) => {
+            if(doc.exists){
+                console.log(doc.exists + "/" + doc.id);
+                var docName = doc.id;
+                if(docName.includes(currentUser.uid)){
+                    //play sfx
+                    playSound('HarmoneyNotificationSFX.mp3');
+                }
+            }
+        });
+    })
+
     getUserData(currentUser.uid).then((data) => {
         UserData = data;
         currentUser.photoURL = data.pic;
@@ -816,7 +1069,9 @@ function onFinishLogin(user, email, pass) {
         //console.log(UserData);
         writeUserData(user.uid, UserData).then();
         createMain();
-        fs.writeFile(userpass, toJ, (err) => {});
+        fs.writeFile(userpass, toJ, (err) => {
+            console.log("ERRRRRRRRRRRRRRR   Saving Username & Password");
+        });
     })
 }
 // when the app is ready create the login prompt
@@ -826,7 +1081,7 @@ app.whenReady().then(() => {
 
 async function getUpdatesAndStart(){
     // try auto login
-    autoLogin();
+    createLogin();
 }
 //Messaging Features
 var fwinwas = false; ipcMain.on("closeFriends", _ => {
@@ -968,13 +1223,46 @@ ipcMain.on("getAllFriendsReq", _ => {
     getAllFR();
     getAllFriends();
 });
-
-//updates friends list every 30s
-setInterval(function() {
-    getAllFR();
-    getAllFriends();
-}, 30000);
     
+async function getAllFriendsWithDoc(data){
+    console.log(data);
+    FriendRequests = data.friends;
+    if(FriendRequests == null || FriendRequests == undefined) return;
+    
+    Friends = [];
+    //remove all undefined from friend requests
+    var filtered = FriendRequests.filter(function(x) {
+        return x !== undefined;
+    });
+    var FinalFriends = [];
+    for (var i = 0; i < FriendRequests.length; i++) {
+        if (FriendRequests[i] != null && FriendRequests[i] != undefined) {
+            //console.log("DOING + " + FriendRequests[i].uid);
+            getUserData(FriendRequests[i].uid)
+                .then((d) => {
+                    // get the name here
+                    if (d != null) {
+                        var FR = {
+                            name: d.name,
+                            uid: d.uid,
+                            pic: d.pic,
+                        }
+                        FinalFriends.push(FR);
+                        if (i >= FriendRequests.length - 1) {
+                            // wont run code unless the 'friends' window is loaded
+                            if (win == null) return;
+                            console.log("FRIENDS:")
+                            console.log("====================================================");
+                            console.log(FinalFriends)
+                            win.webContents.send("getF", FinalFriends);
+                            //streamFR();
+                        }
+                    }
+                });
+        }
+    }
+}
+
 async function getAllFriends() {
     if (currentUser == null) return;
     // resets the friend requests
@@ -989,36 +1277,41 @@ async function getAllFriends() {
         });
         var FinalFriends = [];
         for (var i = 0; i < FriendRequests.length; i++) {
-            if (FriendRequests[i] != null && FriendRequests[i] != undefined) {
+            if (FriendRequests[i] != null && FriendRequests[i] != undefined && FriendRequests[i].uid != null && FriendRequests[i].uid != undefined) {
                 //console.log("DOING + " + FriendRequests[i].uid);
                 getUserData(FriendRequests[i].uid)
-                    .then((d) => {
-                        // get the name here
-                        if (d != null) {
-                            var FR = {
-                                name: d.name,
-                                uid: d.uid,
-                                pic: d.pic,
-                            }
-                            FinalFriends.push(FR);
-                            if (i >= FriendRequests.length - 1) {
-                                // wont run code unless the 'friends' window is loaded
-                                if (win == null) return;
-                                console.log("FRIENDS:")
-                                console.log("====================================================");
-                                console.log(FinalFriends)
-                                win.webContents.send("getF", FinalFriends);
-                                //streamFR();
-                            }
+                .then((d) => {
+                    // get the name here
+                    if (d != null) {
+                        var FR = {
+                            name: d.name,
+                            uid: d.uid,
+                            pic: d.pic,
                         }
-                    });
+                        FinalFriends.push(FR);
+                        if (i >= FriendRequests.length - 1) {
+                            // wont run code unless the 'friends' window is loaded
+                            if (win == null) return;
+                            console.log("FRIENDS:")
+                            console.log("====================================================");
+                            console.log(FinalFriends)
+                            win.webContents.send("getF", FinalFriends);
+                            //streamFR();
+                        }
+                    }
+                });
             }
         }
     });
 }
 
+//open links ect
+const open = require('open');
+//const { data } = require('jquery');
 ipcMain.on("openLink",(event, args) => {
-    require("electron").shell.openExternal(args);
+    console.log("================================> OPENING FILE!");
+    console.log(args);
+    open(args);
 });
 
 //gets all the friends associated with the current user
@@ -1061,8 +1354,41 @@ async function getAllFR() {
         }
     });
 }
-ipcMain
-.on("AcceptReq", (event, uID) => {
+async function updateFR(data) {
+    FriendRequests = data.frequests;
+    if(FriendRequests == null || FriendRequests == undefined) return;
+    Friends = [];
+    //remove all undefined from friend requests
+    var filtered = FriendRequests.filter(function(x) {
+        return x !== undefined;
+    });
+    var FinalFriends = [];
+    for (var i = 0; i < FriendRequests.length; i++) {
+        if (FriendRequests[i] != null && FriendRequests[i] != undefined) {
+            //console.log("DOING + " + FriendRequests[i].uid);
+            getUserData(FriendRequests[i].uid)
+            .then((d) => {
+                // get the name here
+                if (d != null) {
+                    var FR = {
+                        name: d.name,
+                        uid: d.uid,
+                    }
+                    FinalFriends.push(FR);
+                    if (i >= FriendRequests.length - 1) {
+                        // wont run code unless the 'friends' window is loaded
+                        if (fwin == null) return;
+                        //console.log("FRIENDS:")
+                        //console.log("====================================================");
+                        //console.log(FinalFriends)
+                        fwin.webContents.send("getFR", FinalFriends);
+                    }
+                }
+            });
+        }
+    }
+}
+ipcMain.on("AcceptReq", (event, uID) => {
     acceptFriendRequest
         (uID);
 });
@@ -1113,35 +1439,108 @@ function acceptFriendRequest(userID) {
         });
 }
 var currentFriendUID = "";
-var Msg = []; ipcMain
-.on("messageFriend", (event, friendUID) => {
+var Msg = []; 
+ipcMain.on("messageFriend", (event, data) => {
+    var friendUID = data.uid;
+    var friendName = data.name;
+
+    win.webContents.send("oUID",friendUID);
+    win.webContents.send("oName",friendName);
+
+
     currentFriendUID
         = friendUID;
     getMessages
         (currentUser
             .uid, currentFriendUID);
-}); ipcMain
-.on("sendMsg", (event, msg) => {
-        if (msg == "" || msg == null || msg == undefined) {
-            showMessage
-                ("ERROR", "Sent Message Is Undefined");
-            return;
-        }
-        if (currentFriendUID == null || currentFriendUID == "" || currentFriendUID ==
-            undefined) {
-            showMessage("ERROR", "Friend Not Selected, Please Select Friend From The LeftSide Bar");
-                return;
-            }
-            sendMessage(msg, currentUser.uid, currentFriendUID)
-        });
-// get new messages every 2.5s
-setInterval(function() {
-    console.log("CUrrentFRND: " + currentFriendUID);
-    if (currentFriendUID != null && currentFriendUID != undefined && currentUser !=
-        null && currentUser != undefined) {
-        getMessages(currentUser.uid, currentFriendUID);
+}); 
+
+function getLargerID(){
+    var myID = currentUser.uidreplace(/\D/g, '');
+    var otherID = currentFriendUID.replace(/\D/g, '');
+    var ID;
+    if (myID.length > otherID.length) {
+        ID = from + to;
+    } else {
+        ID = to + from;
     }
-}, 2500);
+    return ID;
+}
+
+var updatedDoc = null;
+ipcMain.on("sendoffer",(event,offer) => {
+    //send offer in new db collection
+    var documentName = getLargerID();
+    var caller = {offer: offer,uid: currentUser.uid};
+    var answer = {offer: null,uid: null};
+
+    allCalls.doc(documentName).get()
+    .then((doc) => {
+        //get the document data values
+        var callerData = {};
+        var data = doc.data();
+        var caller = true;
+
+        if(doc.exists){
+            callerData.caller = data.caller;
+            callerData.answer = caller;
+            caller = false;
+
+            //send back true becuase you called
+            //webRTC.sendBackCall();
+        }
+        else{
+            callerData.caller = caller;
+            callerData.answer = null;
+        }
+
+        //save the new document
+        allCalls.doc(documentName).set(callerData, {merge: true});
+        
+        //remove old snapshot watcher
+        if(updatedDoc != null){
+            updatedDoc();
+            updatedDoc = null;
+        }
+
+        //skip if has answered the call
+        if(caller == true){
+            //watch the document for any updates
+            updatedDoc = allCalls.doc(documentName).onSnapshot((doc) => {
+                //wait for caller updates
+                var data = doc.data();
+
+                if(data.answer != null){
+                    //answer the call and scrap the document updater
+                    //webRTC.sendBackCall();
+
+                    //scrap the updateFR
+                    updatedDoc();
+                    updatedDoc = null;
+                }
+            });
+        }
+    })
+});
+
+var lastCalls = [];
+function checkForCalls(data){
+    //look for call updates
+}
+
+ipcMain.on("sendMsg", (event, msg) => {
+    if (msg == "" || msg == null || msg == undefined) {
+        //showMessage("ERROR", "Sent Message Is Undefined");
+        return;
+    }
+    if (currentFriendUID == null || currentFriendUID == "" || currentFriendUID == undefined) {
+    showMessage("ERROR", "Friend Not Selected, Please Select Friend From The LeftSide Bar");
+        return;
+    }
+    sendMessage(msg, currentUser.uid, currentFriendUID)
+});
+
+var messageUpdate;
 var allMsgs = db.collection('allMessages');
 
 function sendMessage(Message, from, to) {
@@ -1176,19 +1575,23 @@ function sendMessage(Message, from, to) {
                 console.log("DATA?");
                 console.log(newData);
                 databasedoc.set(newData, {
-                        merge: true
-                    })
-                    .then(_ => {
-                        //console.log('Saved Data Good :D');
-                        getMessages(currentUser.uid, currentFriendUID);
-                        resolve();
-                    })
-                    .catch(err => {
-                        //console.log("error wriritng to doc: " + err);
-                        getMessages(currentUser.uid, currentFriendUID);
-                        resolve();
-                    });
-            });
+                    merge: true
+                })
+                .then(_ => {
+                    //console.log('Saved Data Good :D');
+                    getMessages(currentUser.uid, currentFriendUID);
+                    resolve();
+                })
+                .catch(err => {
+                    //console.log("error wriritng to doc: " + err);
+                    getMessages(currentUser.uid, currentFriendUID);
+                    resolve();
+                });
+
+                messageUpdate = databasedoc.onSnapshot({}, (doc) => {
+                    getMessagesOnSnapshotUpdate(doc);
+                });
+        });
     });
 }
 
@@ -1201,17 +1604,22 @@ function getMessages(from, to) {
         var ID;
         if (myID.length > otherID.length) {
             ID = from + to;
-            console.log("MY ID LARGER: T");
+            //console.log("MY ID LARGER: T");
         } else {
             ID = to + from;
-            console.log("MY ID LARGER: F");
+            //console.log("MY ID LARGER: F");
         }
-        console.log("ChoSEN ID : " + ID);
+        //console.log("ChoSEN ID : " + ID);
         var databasedoc = allMsgs.doc(ID);
+
+        messageUpdate = databasedoc.onSnapshot({}, (doc) => {
+            getMessagesOnSnapshotUpdate(doc);
+        })
+
         databasedoc.get()
         .then((data) => {
             if (!data.exists) {
-                console.log("Could Not Find Document");
+                //console.log("Could Not Find Document");
                 var d = {
                     messages: [],
                 };
@@ -1233,13 +1641,48 @@ function getMessages(from, to) {
                         resolve(d);
                     });
             } else {
-                console.log("Found Doc:");
-                console.log(data.data().messages);
+                //console.log("Found Doc:");
+                //console.log(data.data().messages);
                 if (win != null) {
                     win.webContents.send("getM", [data.data().messages,currentUser.uid]);
                 }
                 resolve(data.data().messages);
             }
         });
+    });
+}
+
+function getMessagesOnSnapshotUpdate(data) {
+    return new Promise((resolve) => {
+        if (!data.exists) {
+            console.log("Could Not Find Document");
+            var d = {
+                messages: [],
+            };
+            databasedoc.set(d, {
+                    merge: true
+                })
+                .then(_ => {
+                    //console.log('Saved Data Good :D');
+                    if (win != null) {
+                        win.webContents.send("getM", [d,currentUser.uid]);
+                    }
+                    resolve(d);
+                })
+                .catch(err => {
+                    //console.log("error wriritng to doc: " + err);
+                    if (win != null) {
+                        win.webContents.send("getM", [d,currentUser.uid]);
+                    }
+                    resolve(d);
+                });
+        } else {
+            console.log("Found Doc:");
+            console.log(data.data().messages);
+            if (win != null) {
+                win.webContents.send("getM", [data.data().messages,currentUser.uid]);
+            }
+            resolve(data.data().messages);
+        }
     });
 }

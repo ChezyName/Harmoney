@@ -86,7 +86,7 @@ html::-webkit-scrollbar {
     -webkit-transition: left .65s ease-in-out;
 }
 
-#contents *, #themes *{
+#contents *:not(#logout), #themes *{
     width: calc(100% - 10px);
     height: 25px;
     margin-top: 2px;
@@ -95,6 +95,28 @@ html::-webkit-scrollbar {
     margin-right: 5px;
 
     float: top center;
+
+    background-color: var(--interactble);;
+    border: 1px solid var(--backgroundPrimary);
+    color: var(--text);
+    font-size: 4vh;
+    font-weight: bold;
+    outline-color: var(--backgroundPrimary);
+    border-radius: 12px;
+
+    transition: left 0.25 ease-in-out;    
+    transition: left 2.5 ease-in;
+}
+
+#logout{
+    width: calc(100% - 10px);
+    height: 25px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    margin-left: 5px;
+    margin-right: 5px;
+
+    float: bottom center;
 
     background-color: var(--interactble);;
     border: 1px solid var(--backgroundPrimary);

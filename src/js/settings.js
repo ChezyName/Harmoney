@@ -1,6 +1,14 @@
 var ThemesOpened = false;
-
 var Theme = "Dark.css";
+
+var basicThemes = ["Dark","Light","MidnightBlue","Carrot"];
+
+function removeOptions(selectElement) {
+    var i, L = selectElement.options.length - 1;
+    for(i = L; i >= 0; i--) {
+       selectElement.remove(i);
+    }
+}
 
 window.onload = function() {
     var close = document.getElementById("close");
@@ -8,7 +16,7 @@ window.onload = function() {
     //var ThemesParent = document.getElementById("themes");
     //var Content = document.getElementById("contents");
 
-    var change = document.getElementById("accset");
+    //var change = document.getElementById("accset");
     var signout = document.getElementById("logout");
 
     var Theme = document.getElementById('Theme');
@@ -20,9 +28,11 @@ window.onload = function() {
         window.api.send("closesettings")
     });
 
+    /*
     change.addEventListener('click',() =>{
         window.api.send("changeIcon");
     });
+    */
 
     signout.addEventListener('click',() =>{
         window.api.send("signOut");
@@ -45,6 +55,32 @@ window.onload = function() {
         var t = Themes.value;
         console.log("Themes" + t);
         ChangeTheme(t);
+    });
+
+    function addOption(name,parent){
+        var option = document.createElement("option");
+        option.value = name;
+        option.innerHTML = name;
+        parent.appendChild(option);
+    }
+
+    var allThemes = {};
+    window.api.receive("CustomThemes", (themes) => {
+        console.log("getting custom themes.exe.json: ");
+        console.log(themes);
+        
+        allThemes = themes;
+        removeOptions(Themes);
+
+        basicThemes.forEach(function(Themename){
+            addOption(Themename,Themes)
+        });
+
+        allThemes.forEach(function(file){
+            var filename = file.replace('.css','');
+            console.log("Adding : " + filename + " TO The Custom Themes List");
+            addOption(filename,Themes)
+        });
     });
 
     document.onkeydown=keydownHandler;
