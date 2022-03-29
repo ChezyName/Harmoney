@@ -1,5 +1,6 @@
 var ThemesOpened = false;
-var Theme = "Dark.css";
+var CurrTheme = "";
+var CurrentTheme;
 
 var basicThemes = ["Dark","Light","MidnightBlue","Carrot"];
 
@@ -81,16 +82,52 @@ window.onload = function() {
             console.log("Adding : " + filename + " TO The Custom Themes List");
             addOption(filename,Themes)
         });
+
+        Theme.value = CurrTheme;
+        if(CurrTheme == "" || CurrTheme == undefined){
+            var op = Themes.options;
+
+            for(let i = 0; i < op.length; i++){
+                console.log("Compairing.....");
+                console.log(op[i].value);
+                console.log(CurrentTheme);
+                
+                if(op[i].value.includes(CurrentTheme)){
+                    console.log(op[i].value);
+                    Themes.value = op[i].value;
+                    CurrTheme = op;
+                }
+            }
+        }
     });
 
     document.onkeydown=keydownHandler;
 
-    window.api.receive("ThemeChanged", (theme) => {
+    window.api.receive("ThemeChanged", (theme,_t) => {
+        CurrentTheme = _t;
         // Change Theme For The Document
         Theme.setAttribute("href", theme);
+        console.log("Theme was : " + theme)
+
+        var op = Themes.options;
+        console.log("THEMES LENGTH IS: " + op.length);
+        for(let i = 0; i < op.length; i++){
+            if(op[i].value.includes(_t)){
+                Themes.value = op[i].value;
+                CurrTheme = op;
+            }
+        }
     });
 
+    var refresh = document.getElementById("RT");
+    refresh.addEventListener('click', function(e) {
+        window.api.send("SendAllThemes");
+    });
 
+    var openFolder = document.getElementById("OTF");
+    openFolder.addEventListener('click', function(e) {
+        window.api.send("OpenFolder");
+    });
 
     /*
     function ThemeWindow(){
@@ -109,10 +146,24 @@ window.onload = function() {
     }
 
     window.api.receive("MainChanged", (t,_t) => {
+        CurrentTheme = _t;
         console.log("Changing Theme To New Theme : " + t);
         if(t == null) return;
         console.log("Chaning Theme To : " + t);
         Theme.setAttribute("href", t);
-        Themes.value = _t;
+
+        var op = Themes.options;
+
+        for(let i = 0; i < op.length; i++){
+            console.log("Compairing.....");
+            console.log(op[i].value);
+            console.log(_t);
+
+            if(op[i].value.includes(_t)){
+                console.log(op[i].value);
+                Themes.value = op[i].value;
+                CurrTheme = op;
+            }
+        }
     });
 }

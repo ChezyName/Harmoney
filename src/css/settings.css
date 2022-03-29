@@ -116,7 +116,9 @@ html::-webkit-scrollbar {
     margin-left: 5px;
     margin-right: 5px;
 
-    float: bottom center;
+    position: absolute;
+    left: 0%;
+    bottom: 25px;
 
     background-color: var(--interactble);;
     border: 1px solid var(--backgroundPrimary);
@@ -130,8 +132,9 @@ html::-webkit-scrollbar {
     transition: left 2.5 ease-in;
 }
 
-#contents *:hover , #themes *:hover {
+#contents *:hover{
     background-color: var(--interactbleHover);
+    transition: background-color 0.25 ease-in-out;    
 }
 
 #themes.moveT{

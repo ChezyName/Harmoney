@@ -48,7 +48,7 @@ class HarmoneySettings {
 
 const path = require('path');
 const iconPath = "icon/icon.ico";
-const {app, BrowserWindow, dialog} = require('electron');
+const {app, BrowserWindow, dialog, shell} = require('electron');
 const {ipcMain} = require('electron');
 const {join} = require('path/posix');
 let fs = require('fs');
@@ -185,7 +185,7 @@ async function createMain() {
         movable: true,
         maximizable: false,
         darkTheme: true,
-        devTools: true,
+        devTools: false,
         titleBarStyle: "hidden",
         show: false,
         backgroundColor: '#FFF',
@@ -266,7 +266,7 @@ async function createMain() {
         //if(win != null) win.close();
         win = newWin;
         getAllFriends();
-        win.openDevTools();
+        //win.openDevTools();
         let getT = async function() {
             if (fs.existsSync(filename)) {
                 //File Exits
@@ -386,6 +386,14 @@ ipcMain.on("close", (e, args) => {
         },1262)
     }
 });
+ipcMain.on('SendAllThemes', (event, args) => {
+    //get the themes
+    getAllThemes();
+});
+ipcMain.on('OpenFolder', (event, args) => {
+    //open the themes folder
+    shell.openPath(themeFolder);
+});
 ipcMain.on("msg", (event, args) => {
     showMessage("ERROR", args);
 })
@@ -474,7 +482,7 @@ function SettingsMenu() {
     Set = new BrowserWindow({
         width: 300,
         height: 400,
-        resizable: true,
+        resizable: false,
         movable: true,
         maximizable: false,
         darkTheme: true,
@@ -492,7 +500,7 @@ function SettingsMenu() {
     })
     Set.loadFile('src/html/settings.html')
     Set.webContents.once('did-finish-load', function() {
-        Set.openDevTools();
+        //Set.openDevTools();
         Set.show();
         setTheme();
         getAllThemes();
@@ -555,7 +563,7 @@ async function createLogin() {
     loginWin = new BrowserWindow({
         width: 250,
         height: 400,
-        resizable: true,
+        resizable: false,
         movable: true,
         maximizable: false,
         darkTheme: true,
@@ -579,7 +587,7 @@ async function createLogin() {
         loginWin = null;
     });
     loginWin.webContents.once('did-finish-load', function() {
-        loginWin.openDevTools();
+        //loginWin.openDevTools();
 
         loginWin.show();
         console.log("n WebCont");
@@ -1164,7 +1172,7 @@ function friendReqestWindow() {
     fwin = new BrowserWindow({
         width: 250,
         height: 400,
-        resizable: true,
+        resizable: false,
         movable: true,
         maximizable: false,
         darkTheme: true,
